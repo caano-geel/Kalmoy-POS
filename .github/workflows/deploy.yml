@@ -1,3 +1,12 @@
+# Deploy Kalmoy POS to InfinityFree (kalmoypos.com/htdocs/) via FTP.
+#
+# Incremental sync: SamKirkland/FTP-Deploy-Action compares SHA-256 hashes against
+# htdocs/.ftp-deploy-sync-state.json on the server and uploads only changed files.
+# Do NOT add the sync state file to the exclude list — that forces a full re-upload.
+#
+# Protected on the server (never deployed or deleted by this workflow):
+# config.production.php, initialize.production.php, .env, uploads/, backups/, cache/, logs/
+
 name: Deploy to InfinityFree
 
 on:
@@ -5,16 +14,21 @@ on:
     branches:
       - main
 
+concurrency:
+  group: deploy-kalmoypos-main
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Deploy to InfinityFree
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -23,7 +37,10 @@ jobs:
           port: 21
           local-dir: ./
           server-dir: ./htdocs/
+          state-name: .ftp-deploy-sync-state.json
           dangerous-clean-slate: false
+          timeout: 120000
+          log-level: standard
           exclude: |
             **/.git*
             **/.git*/**
@@ -47,8 +64,13 @@ jobs:
             **/*.log
             **/*.zip
             **/*.rar
+            **/*.example
+            **/.gitignore
             **/OFFLINE_SETUP.md
             **/LOCAL_SETUP.md
+            **/DEPLOY_INFINITYFREE.md
+            **/README.md
             **/tools/**
-            README.md
-            .ftp-deploy-sync-state.json
+            **/build/**
+            **/composer.json
+            **/composer.lock
