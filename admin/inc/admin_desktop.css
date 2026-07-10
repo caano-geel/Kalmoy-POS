@@ -1,0 +1,253 @@
+/**
+ * Kalmoy POS — Desktop-first layout (shop counter / offline PC)
+ * Targets: 1366×768, 1600×900, 1920×1080
+ */
+
+@media (min-width: 1025px) {
+    body.sidebar-modern-ui .content-wrapper > .content > .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        max-width: 100%;
+    }
+
+    body.sidebar-modern-ui .content-wrapper {
+        padding-top: 0.5rem !important;
+    }
+
+    /* Slightly larger readable base for desktop counters */
+    body.sidebar-modern-ui {
+        font-size: 0.92rem;
+    }
+
+    body.sidebar-modern-ui .card-title {
+        font-size: 1.05rem;
+    }
+
+    /* Tables: comfortable row height without horizontal scroll */
+    body.sidebar-modern-ui .ash-table {
+        font-size: 0.88rem;
+    }
+
+    body.sidebar-modern-ui .ash-table thead th {
+        font-size: 0.72rem;
+        padding: 0.55rem 0.65rem;
+        white-space: nowrap;
+    }
+
+    body.sidebar-modern-ui .ash-table tbody td {
+        padding: 0.5rem 0.65rem;
+        vertical-align: middle;
+    }
+
+    body.sidebar-modern-ui .ash-table-wrap,
+    body.sidebar-modern-ui .mod-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Module pages */
+    body.sidebar-modern-ui .mod-page {
+        max-width: 100%;
+    }
+
+    body.sidebar-modern-ui .mod-section {
+        margin-bottom: 1rem;
+    }
+
+    body.sidebar-modern-ui .mod-section-body {
+        padding: 0.9rem 1rem;
+    }
+
+    body.sidebar-modern-ui .mod-mini-stat {
+        min-height: 72px;
+    }
+
+    /* Forms */
+    body.sidebar-modern-ui .form-control {
+        font-size: 0.9rem;
+        min-height: calc(1.5em + 0.65rem + 2px);
+    }
+
+    body.sidebar-modern-ui .btn {
+        font-size: 0.88rem;
+    }
+
+    body.sidebar-modern-ui .ash-table-actions .btn,
+    body.sidebar-modern-ui .ash-icon-btn {
+        min-width: 2rem;
+        min-height: 2rem;
+    }
+
+    /* DataTables filter row */
+    body.sidebar-modern-ui .dataTables_wrapper .dataTables_filter input {
+        min-width: 180px;
+        max-width: 280px;
+    }
+
+    body.sidebar-modern-ui .card-header .card-tools {
+        gap: 0.35rem;
+    }
+}
+
+/* 1366px laptops — tighter sidebar, more content width */
+@media (min-width: 1025px) and (max-width: 1400px) {
+    body.sidebar-modern-ui:not(.sidebar-collapse) .main-sidebar.sidebar-modern,
+    body.sidebar-modern-ui:not(.sidebar-collapse) .main-sidebar.sidebar-modern::before {
+        width: 220px;
+    }
+
+    body.sidebar-modern-ui:not(.sidebar-collapse) .content-wrapper,
+    body.sidebar-modern-ui:not(.sidebar-collapse) .main-footer,
+    body.sidebar-modern-ui:not(.sidebar-collapse) .main-header {
+        margin-left: 220px;
+    }
+
+    body.sidebar-modern-ui .sidebar-modern .nav-sidebar .nav-link {
+        padding: 0.45rem 0.65rem;
+        font-size: 0.84rem;
+    }
+
+    body.sidebar-modern-ui .mod-header h4 {
+        font-size: 1.05rem;
+    }
+}
+
+/* 1600–1920+ — balanced spacing */
+@media (min-width: 1600px) {
+    body.sidebar-modern-ui .content-wrapper > .content > .container-fluid {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+
+    body.sidebar-modern-ui .ash-table {
+        font-size: 0.9rem;
+    }
+}
+
+/* POS desktop counter layout */
+@media (min-width: 1025px) {
+    body.sidebar-modern-ui .pos-layout-wrap {
+        min-height: calc(100vh - 120px);
+    }
+
+    body.sidebar-modern-ui #pos-product-grid {
+        max-height: calc(100vh - 220px);
+        overflow-y: auto;
+    }
+
+    body.sidebar-modern-ui #pos-cart-panel {
+        max-height: calc(100vh - 140px);
+    }
+
+    body.sidebar-modern-ui .pos-cart-table {
+        font-size: 0.9rem;
+    }
+
+    body.sidebar-modern-ui .pos-cart-table th,
+    body.sidebar-modern-ui .pos-cart-table td {
+        padding: 0.45rem 0.5rem;
+    }
+
+    body.sidebar-modern-ui .pos-totals-box {
+        font-size: 1rem;
+    }
+
+    body.sidebar-modern-ui .pos-totals-box .grand-total {
+        font-size: 1.35rem;
+    }
+}
+
+/* Dashboard stat grid on desktop */
+@media (min-width: 1025px) {
+    body.sidebar-modern-ui .ash-stat-col {
+        margin-bottom: 0.75rem;
+    }
+
+    body.sidebar-modern-ui .card.card-outline.card-primary {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Backup / permissions wide panels */
+@media (min-width: 1200px) {
+    body.sidebar-modern-ui .ash-perm-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+}
+
+/* Clean Data — backup page action buttons */
+.clean-data-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: stretch;
+    margin: 16px 0;
+    width: 100%;
+    clear: both;
+}
+
+.clean-data-actions .btn {
+    min-width: 170px;
+    height: 44px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+    font-size: 0.84rem;
+    font-weight: 600;
+    line-height: 1.2;
+    flex: 0 1 auto;
+}
+
+.clean-data-actions .btn i {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.clean-data-actions .btn span {
+    flex-shrink: 0;
+}
+
+.clean-data-notes {
+    margin-top: 4px;
+    padding-top: 4px;
+    clear: both;
+}
+
+/* 1920×1080 — single row when space allows */
+@media (min-width: 1600px) {
+    .clean-data-actions {
+        flex-wrap: nowrap;
+    }
+
+    .clean-data-actions .btn {
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: none;
+    }
+
+    .clean-data-actions .btn-clean-data-reset {
+        flex: 1.15 1 0;
+    }
+}
+
+/* 1366×768 — wrap into 2–3 columns cleanly */
+@media (min-width: 1025px) and (max-width: 1599px) {
+    .clean-data-actions .btn {
+        flex: 1 1 calc(33.333% - 12px);
+        min-width: 160px;
+        max-width: calc(50% - 6px);
+    }
+}
+
+@media (max-width: 575px) {
+    .clean-data-actions .btn {
+        flex: 1 1 100%;
+        min-width: 0;
+        width: 100%;
+    }
+}

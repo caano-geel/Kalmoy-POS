@@ -1,0 +1,52 @@
+-- =============================================================================
+-- Create the first production administrator (PRIVATE — do not commit with a real hash)
+-- =============================================================================
+-- 1. Copy this file to:
+--      database/create_production_admin.private.sql
+--    (that filename is gitignored)
+--
+-- 2. Generate a password hash using the SAME method as the application:
+--      app_hash_password() → password_hash($password, PASSWORD_DEFAULT)
+--
+--    PowerShell / CMD (from project root, with PHP in PATH):
+--
+--      php -r "echo password_hash('YOUR_STRONG_PASSWORD_HERE', PASSWORD_DEFAULT), PHP_EOL;"
+--
+--    Paste the output (starts with $2y$) into YOUR_PASSWORD_HASH_HERE below.
+--
+--    Note: The app also accepts legacy 32-char MD5 hashes for old accounts, but
+--    NEW accounts must use password_hash() / PASSWORD_DEFAULT (bcrypt).
+--
+-- 3. Import this SQL in phpMyAdmin AFTER importing production_schema.sql
+--    (local: ash_pos_db | production: if0_42375362_kalmoyposdb)
+--
+-- 4. Delete the private SQL file from the server after import if you uploaded it.
+-- =============================================================================
+
+INSERT INTO `users` (
+  `firstname`,
+  `lastname`,
+  `username`,
+  `email`,
+  `phone`,
+  `password`,
+  `avatar`,
+  `last_login`,
+  `type`,
+  `status`,
+  `permissions`,
+  `date_added`
+) VALUES (
+  'Owner',
+  'Admin',
+  'YOUR_ADMIN_USERNAME_HERE',
+  NULL,
+  NULL,
+  'YOUR_PASSWORD_HASH_HERE',
+  NULL,
+  NULL,
+  1,
+  1,
+  NULL,
+  NOW()
+);

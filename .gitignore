@@ -1,0 +1,52 @@
+# Secrets / environment (never commit real passwords)
+.env
+.env.*
+!.env.example
+config.local.php
+config.production.php
+initialize.local.php
+initialize.production.php
+
+# Private one-time admin bootstrap (real hash — never commit)
+database/create_production_admin.private.sql
+database/*.private.sql
+!database/*.private.sql.example
+
+# Logs / temp / cache
+*.log
+logs/
+cache/
+tmp/
+temp/
+
+# Runtime uploads (user/media content). Seed branding lives in assets/branding/ (committed).
+uploads/
+!uploads/.htaccess
+!uploads/**/.htaccess
+
+# Backups and archives
+backups/
+*.zip
+*.rar
+*.7z
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# FTP deploy state
+.ftp-deploy-sync-state.json
+
+# Local-only / dangerous tooling
+database/build_infinityfree_deploy.php
+database/backup_products_before_replace_*.sql
+database/seed_dummy_data.sql
+database/cbpos_db.sql
+database/generate_dummy_data.php
+
+# Optional local scratch / old credential copies
+backup_production_config/

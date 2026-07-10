@@ -1,0 +1,17 @@
+uploads/backups/*.sql
+config.local.php
+config.production.php
+initialize.production.php
+initialize.local.php
+.env
+.env.infinityfree
+.git/
+.github/
+database/
+backups/
+backup_production_config/
+uploads/temp/
+tools/
+README.md
+LOCAL_SETUP.md
+OFFLINE_SETUP.md

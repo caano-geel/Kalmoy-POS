@@ -1,0 +1,18 @@
+<?php
+/**
+ * Optional local overrides (LEGACY filename).
+ * Prefer config.local.php — this file is still loaded as a fallback.
+ * Copy to initialize.local.php if needed (gitignored).
+ */
+define('APP_ENV', 'local');
+define('DB_SERVER', 'localhost');
+define('DB_HOST', 'localhost');
+define('DB_PORT', 3306);
+define('DB_USERNAME', 'root');
+define('DB_PASSWORD', '');
+define('DB_NAME', 'ash_pos_db');
+define('DB_SSL', false);
+define('DB_SSL_CA', '');
+
+// Auto-detected from htdocs folder name. Uncomment to force a custom URL:
+// define('base_url', 'http://localhost/BestPosKalmoy/');

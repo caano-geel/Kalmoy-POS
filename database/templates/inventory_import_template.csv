@@ -1,0 +1,7 @@
+Product Name,Barcode,Brand,Category,Variant,Retail Price,Unit Cost,Quantity,Low Stock Alert,Status
+"IMPORTANT: Barcode column must remain as TEXT. Prefix with apostrophe if needed: '01266115",,,,,,,,
+Indho-Kuul,8901234567890,Al Sunnah Herbal,Beauty & Care,Default,1000,650,50,5,Active
+Batana Oil,9789914467543,Al Sunnah Herbal,Hair Care,Default,1200,720,30,5,Active
+Arabica Coffee,'01266115,Al Sunnah Herbal,Wellness,250g Pack,850,420,25,5,Active
+Herbal Seamoss Gel,6280000000598,ASH Herbal,Herbal Supplements,500g,1500,900,40,5,Active
+Custom SKU Item,ASH-AVB-075,ASH Herbal,Skin Care,Default,950,500,15,5,Active

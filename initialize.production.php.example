@@ -1,0 +1,31 @@
+<?php
+/**
+ * InfinityFree production credentials (LEGACY filename).
+ * Prefer config.production.php — this file is still loaded as a fallback.
+ * Copy from initialize.production.php.example on the server (gitignored).
+ */
+if (!defined('APP_ENV')) {
+    define('APP_ENV', 'production');
+}
+if (!defined('DB_SERVER')) {
+    define('DB_SERVER', 'sql110.infinityfree.com');
+}
+if (!defined('DB_HOST')) {
+    define('DB_HOST', 'sql110.infinityfree.com');
+}
+if (!defined('DB_USERNAME')) {
+    define('DB_USERNAME', 'if0_42375362');
+}
+if (!defined('DB_NAME')) {
+    define('DB_NAME', 'if0_42375362_kalmoyposdb');
+}
+if (!defined('DB_PASSWORD')) {
+    // InfinityFree MySQL password = your vPanel login password (NOT the username).
+    define('DB_PASSWORD', 'YOUR_VPANEL_PASSWORD_HERE');
+}
+if (!defined('DB_PORT')) {
+    define('DB_PORT', 3306);
+}
+if (!defined('DB_SSL')) {
+    define('DB_SSL', false);
+}

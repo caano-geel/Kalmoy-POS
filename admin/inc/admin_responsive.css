@@ -1,0 +1,799 @@
+/**
+ * Kalmoy POS — Admin responsive layout
+ * Mobile 320–480 | Large phone 481–767 | Tablet 768–1024 | Desktop 1025+
+ */
+
+/* ── Global: prevent horizontal page scroll ── */
+html {
+    overflow-x: hidden;
+}
+
+body.sidebar-modern-ui {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+body.sidebar-modern-ui .wrapper,
+body.sidebar-modern-ui .content-wrapper,
+body.sidebar-modern-ui .content,
+body.sidebar-modern-ui .container-fluid {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body.sidebar-modern-ui.sidebar-open {
+    overflow: hidden;
+}
+
+body.sidebar-modern-ui.ash-sidebar-scroll-lock {
+    overflow: hidden !important;
+    touch-action: none;
+}
+
+body.sidebar-modern-ui.ash-sidebar-scroll-lock .content-wrapper,
+body.sidebar-modern-ui.ash-sidebar-scroll-lock .main-header {
+    touch-action: none;
+}
+
+/* ── Header / navbar ── */
+@media (max-width: 767.98px) {
+    body.sidebar-modern-ui .main-header.navbar {
+        padding-left: .35rem;
+        padding-right: .35rem;
+    }
+
+    body.sidebar-modern-ui .main-header .navbar-nav.ml-auto {
+        flex-wrap: nowrap;
+    }
+
+    body.sidebar-modern-ui .main-header .nav-link .ml-3,
+    body.sidebar-modern-ui .main-header .btn-rounded.badge .ml-3 {
+        display: none !important;
+    }
+
+    body.sidebar-modern-ui .main-header .btn-rounded.badge {
+        padding: .25rem .45rem;
+        font-size: .75rem;
+    }
+
+    body.sidebar-modern-ui .main-header .user-img {
+        position: static;
+        margin: 0;
+    }
+
+    body.sidebar-modern-ui .main-header .navbar-nav .nav-item.d-none.d-sm-inline-block {
+        display: none !important;
+    }
+
+    body.sidebar-modern-ui .main-header .navbar-nav .nav-item.d-sm-inline-block {
+        display: list-item !important;
+    }
+
+    body.sidebar-modern-ui .main-header .nav-link.d-sm-inline-block {
+        font-size: .78rem;
+        padding: .4rem .35rem;
+        max-width: 42vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    body.sidebar-modern-ui .main-header .nav-link.d-sm-inline-block {
+        max-width: 36vw;
+        font-size: .72rem;
+    }
+
+    .notif-center-dropdown {
+        width: calc(100vw - 1rem) !important;
+        max-width: calc(100vw - 1rem) !important;
+        right: .5rem !important;
+        left: auto !important;
+    }
+}
+
+/* Show short app title on mobile */
+body.sidebar-modern-ui .main-header .ash-nav-title-mobile {
+    display: none;
+}
+
+@media (max-width: 767.98px) {
+    body.sidebar-modern-ui .main-header .ash-nav-title-mobile {
+        display: inline-block;
+        font-size: .8rem;
+        font-weight: 600;
+        color: #334155;
+        max-width: 38vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: .5rem .25rem;
+    }
+}
+
+/* ── Content area padding ── */
+@media (max-width: 767.98px) {
+    body.sidebar-modern-ui .content-wrapper {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    body.sidebar-modern-ui .content-wrapper > .content {
+        padding: .5rem .65rem 1rem;
+    }
+
+    body.sidebar-modern-ui .content-wrapper > .content > .container-fluid {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    body.sidebar-modern-ui .main-footer {
+        text-align: center;
+        padding: .65rem .75rem;
+    }
+
+    body.sidebar-modern-ui .main-footer .float-right {
+        float: none !important;
+        display: block;
+        margin-top: .35rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    body.sidebar-modern-ui .content-wrapper > .content {
+        padding: .65rem .85rem 1rem;
+    }
+}
+
+/* ── Dashboard / module metric cards ── */
+.dash-mini-value,
+.mod-mini-value {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.dash-mini-body,
+.mod-mini-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.pl-amount {
+    font-weight: 700;
+}
+
+.pl-amount-profit {
+    color: #16a34a;
+}
+
+.pl-amount-loss {
+    color: #dc2626;
+}
+
+.dash-mini-stat.pl-stat-loss,
+.mod-mini-stat.pl-stat-loss {
+    border-color: rgba(220, 38, 38, 0.22);
+    background: #fff8f8;
+}
+
+/* Grid: 1 col <360px | 2 col mobile/tablet | 4 col desktop */
+.ash-stat-col,
+.ash-insight-col {
+    margin-bottom: .35rem;
+}
+
+@media (max-width: 359.98px) {
+    .ash-stat-col,
+    .ash-insight-col {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+@media (min-width: 360px) and (max-width: 1024px) {
+    .ash-stat-col,
+    .ash-insight-col {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+}
+
+@media (min-width: 1025px) {
+    .ash-stat-col,
+    .ash-insight-col {
+        flex: 0 0 25% !important;
+        max-width: 25% !important;
+    }
+}
+
+/* Compact metric cards on phones */
+@media (max-width: 767.98px) {
+    .dash-section {
+        margin-bottom: 12px;
+    }
+
+    .dash-section-header {
+        padding: 8px 12px;
+        font-size: .7rem;
+    }
+
+    .dash-section-body {
+        padding: .45rem !important;
+    }
+
+    .dash-stat-grid,
+    .mod-section-body > .row {
+        margin-left: -.2rem !important;
+        margin-right: -.2rem !important;
+    }
+
+    .dash-stat-grid > [class*="col"],
+    .mod-section-body > .row > .ash-stat-col {
+        padding-left: .2rem !important;
+        padding-right: .2rem !important;
+        margin-bottom: .35rem !important;
+    }
+
+    .dash-mini-stat,
+    .mod-mini-stat {
+        min-height: 0 !important;
+        padding: .42rem .38rem !important;
+        align-items: center;
+        border-radius: .35rem;
+    }
+
+    .dash-mini-icon,
+    .mod-mini-icon {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: .65rem !important;
+        margin-right: .35rem !important;
+        border-radius: .28rem;
+    }
+
+    .dash-mini-label,
+    .mod-mini-label {
+        font-size: .56rem !important;
+        letter-spacing: .02em;
+        margin-bottom: .06rem !important;
+        line-height: 1.15;
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .dash-mini-value,
+    .mod-mini-value {
+        font-size: .76rem !important;
+        line-height: 1.15;
+    }
+
+    /* Business insights — 2-up compact panels */
+    .dash-insight-grid > .ash-insight-col {
+        padding-left: .2rem !important;
+        padding-right: .2rem !important;
+        margin-bottom: .35rem !important;
+    }
+
+    .ash-insight-col .dash-panel .card-header {
+        font-size: .68rem;
+        padding: .38rem .45rem;
+        line-height: 1.25;
+    }
+
+    .ash-insight-col .dash-panel .card-header .badge {
+        font-size: .62rem;
+        padding: .15rem .35rem;
+    }
+
+    .ash-insight-col .dash-panel .card-body {
+        padding: .4rem .45rem !important;
+    }
+
+    .ash-insight-col .dash-panel .card-body canvas {
+        max-height: 88px !important;
+    }
+
+    .ash-insight-col .dash-panel .card-body.p-2 {
+        max-height: 110px !important;
+        padding: .35rem !important;
+        font-size: .68rem;
+    }
+
+    .ash-insight-col .dash-panel .card-body .small {
+        font-size: .65rem !important;
+    }
+
+    .ash-insight-col .dash-panel .btn-sm {
+        font-size: .68rem;
+        padding: .2rem .4rem;
+    }
+
+    .dash-welcome {
+        margin-bottom: .5rem;
+    }
+
+    .dash-welcome .card-body {
+        padding: .65rem .75rem;
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .dash-welcome .text-right.d-none.d-md-block {
+        display: none !important;
+    }
+
+    .dash-welcome h5 {
+        font-size: .92rem;
+    }
+
+    .dash-welcome .dash-summary {
+        font-size: .72rem;
+        line-height: 1.4;
+        margin-top: .25rem;
+    }
+}
+
+/* Extra-compact on very small phones (single column) */
+@media (max-width: 359.98px) {
+    .dash-mini-stat,
+    .mod-mini-stat {
+        padding: .5rem .45rem !important;
+    }
+
+    .dash-mini-icon,
+    .mod-mini-icon {
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    .dash-mini-value,
+    .mod-mini-value {
+        font-size: .82rem !important;
+    }
+}
+
+/* ── Module pages (expenses, analytics, backup) ── */
+@media (max-width: 767.98px) {
+    .mod-header .card-body {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .mod-header .mod-btn-action,
+    .mod-header .btn {
+        width: 100%;
+        margin-top: .5rem;
+    }
+
+    .mod-header h4 {
+        font-size: 1rem;
+    }
+
+    .mod-section-body > .row > [class*="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .mod-filter-card .row > [class*="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .mod-filter-card .btn-block {
+        width: 100%;
+    }
+
+    .mod-btn-export {
+        flex: 1 1 auto;
+        margin-bottom: .35rem;
+    }
+
+    .mod-header .d-flex.flex-wrap .btn {
+        width: calc(50% - .25rem);
+    }
+}
+
+/* ── Cards & forms ── */
+@media (max-width: 767.98px) {
+    #save-cashier-permissions,
+    .card-footer .btn-primary {
+        width: 100%;
+    }
+
+    .permission-list {
+        max-height: none;
+    }
+
+    .card-header {
+        flex-wrap: wrap;
+    }
+
+    .card-header .card-tools {
+        width: 100%;
+        margin-top: .5rem;
+        margin-left: 0 !important;
+    }
+
+    .card-header .card-tools form,
+    .card-header .card-tools .btn {
+        width: 100%;
+    }
+
+    .card-header .card-tools .form-inline {
+        display: block !important;
+        width: 100%;
+    }
+
+    .card-header .card-tools select,
+    .card-header .card-tools .form-control {
+        width: 100% !important;
+    }
+
+    .card .form-group[class*="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .filter-form .row > [class*="col-"],
+    #filter-form .row > [class*="col-"],
+    form .row.align-items-end > [class*="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: .5rem;
+    }
+
+    #filter-form .btn,
+    .filter-form .btn,
+    form .row .btn-block {
+        width: 100%;
+    }
+
+    .btn-group.btn-block {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btn-group.btn-block > .btn {
+        width: 100%;
+        margin-bottom: .35rem;
+        border-radius: .25rem !important;
+    }
+}
+
+/* ── Tables ── */
+.ash-table-scroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: .5rem;
+}
+
+.ash-table-scroll > .table,
+.ash-table-scroll > .dataTables_wrapper {
+    margin-bottom: 0;
+}
+
+.mod-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mod-table-wrap > .table {
+    min-width: 520px;
+    margin-bottom: 0;
+}
+
+.ash-table-scroll .table {
+    min-width: 520px;
+}
+
+@media (max-width: 767.98px) {
+    .dataTables_wrapper .row:first-child,
+    .dataTables_wrapper .row:last-child {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        text-align: left !important;
+        float: none !important;
+        width: 100%;
+        margin-bottom: .5rem;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        width: 100% !important;
+        margin-left: 0 !important;
+        display: block;
+        margin-top: .25rem;
+    }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        text-align: center !important;
+        float: none !important;
+        width: 100%;
+        margin-top: .5rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+/* ── Charts ── */
+.ash-chart-wrap {
+    position: relative;
+    width: 100%;
+    min-height: 180px;
+    max-height: 280px;
+}
+
+.ash-chart-wrap canvas {
+    max-width: 100% !important;
+}
+
+.mod-chart-panel .mod-chart-body {
+    min-height: 180px;
+    max-height: 240px;
+}
+
+@media (max-width: 767.98px) {
+    .ash-chart-wrap {
+        min-height: 200px;
+        max-height: 240px;
+    }
+
+    .dash-panel .card-body canvas {
+        max-height: 220px !important;
+    }
+
+    #salesTrendChart {
+        max-height: 220px !important;
+    }
+
+    .dash-chart-filters {
+        flex-wrap: wrap;
+        gap: .25rem;
+    }
+
+    .dash-chart-filters .btn {
+        flex: 1 1 auto;
+        min-width: 3rem;
+    }
+}
+
+/* ── POS ── */
+@media (max-width: 991.98px) {
+    #pos-search-results {
+        max-height: 240px;
+    }
+
+    #pos-cart-table {
+        min-width: 480px;
+    }
+
+    #pos-complete-sale,
+    #pos-hold-sale,
+    #pos-resume-sale,
+    #pos-clear-held {
+        min-height: 44px;
+    }
+
+    .pos-action-row .btn-group.btn-block {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 575.98px) {
+    #pos-search + .input-group-append,
+    #pos-search {
+        font-size: 16px; /* prevent iOS zoom */
+    }
+
+    .input-group #pos-search-btn,
+    .input-group #start-pos-scan {
+        padding-left: .5rem;
+        padding-right: .5rem;
+        font-size: .8rem;
+    }
+
+    #start-pos-scan .fa-barcode + span,
+    #start-pos-scan {
+        white-space: nowrap;
+    }
+}
+
+/* ── Sales report ── */
+@media (max-width: 767.98px) {
+    .sales-summary-row .col {
+        flex: 0 0 50%;
+        max-width: 50%;
+        margin-bottom: .5rem;
+    }
+
+    .sales-summary-card .value {
+        font-size: .9rem;
+        word-break: break-word;
+    }
+}
+
+@media (max-width: 400px) {
+    .sales-summary-row .col {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ── Login ── */
+@media (max-width: 575.98px) {
+    body.login-page #page-title {
+        font-size: 1.65rem !important;
+        padding: 1rem !important;
+    }
+
+    body.login-page .login-box {
+        width: 92%;
+        max-width: 100%;
+        margin: 0 auto 1.5rem;
+    }
+
+    body.login-page .login-box .row .col-sm-4,
+    body.login-page .login-box .row .col-sm-8,
+    body.login-page .login-box .row .col-4,
+    body.login-page .login-box .row .col-8 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    body.login-page .login-box .btn-block {
+        width: 100%;
+        margin-top: .5rem;
+    }
+
+    body.login-page .form-control {
+        font-size: 16px;
+    }
+}
+
+/* ── Modals: uni_modal scrollable body, fixed header/footer ── */
+#uni_modal .modal-dialog {
+    max-height: 90vh;
+    width: 100%;
+    margin: 1.75rem auto;
+}
+
+#uni_modal .modal-dialog.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 3.5rem);
+}
+
+#uni_modal .modal-content {
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#uni_modal .modal-header {
+    flex: 0 0 auto;
+    flex-shrink: 0;
+}
+
+#uni_modal .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#uni_modal .modal-footer {
+    flex: 0 0 auto;
+    flex-shrink: 0;
+}
+
+@media (max-width: 767.98px) {
+    #uni_modal .modal-dialog {
+        max-width: 95vw;
+        width: 95vw;
+        margin: 0.5rem auto;
+        max-height: 90vh;
+    }
+
+    #uni_modal .modal-dialog.modal-dialog-centered {
+        min-height: calc(100% - 1rem);
+    }
+
+    #uni_modal .modal-content {
+        max-height: 90vh;
+    }
+
+    #uni_modal .modal-header {
+        padding: 0.65rem 0.85rem;
+    }
+
+    #uni_modal .modal-header .modal-title {
+        font-size: 1rem;
+        line-height: 1.3;
+        padding-right: 1.5rem;
+    }
+
+    #uni_modal .modal-body {
+        padding: 0.75rem 0.85rem;
+    }
+
+    #uni_modal .modal-footer {
+        padding: 0.6rem 0.85rem;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.35rem;
+    }
+
+    #uni_modal .modal-footer .btn {
+        min-height: 40px;
+        flex: 1 1 auto;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .modal-dialog:not(#uni_modal .modal-dialog) {
+        margin: .5rem;
+        max-width: calc(100% - 1rem);
+    }
+}
+
+/* Import Excel modal: preserve wider layout, inherit scroll body */
+#uni_modal.import-excel-modal .modal-dialog {
+    max-width: 96vw;
+    width: 1100px;
+}
+
+#uni_modal.import-excel-modal .modal-body {
+    max-height: none;
+}
+
+/* ── Sidebar mobile overlay ── */
+@media (max-width: 767.98px) {
+    body.sidebar-modern-ui #sidebar-overlay {
+        display: block !important;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1037;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        cursor: pointer;
+    }
+
+    body.sidebar-modern-ui.sidebar-open #sidebar-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+/* Tablet: collapsed rail by default */
+@media (min-width: 768px) and (max-width: 1024px) {
+    body.sidebar-modern-ui.sidebar-collapse .content-wrapper,
+    body.sidebar-modern-ui.sidebar-collapse .main-footer,
+    body.sidebar-modern-ui.sidebar-collapse .main-header {
+        margin-left: var(--sb-collapsed) !important;
+    }
+}

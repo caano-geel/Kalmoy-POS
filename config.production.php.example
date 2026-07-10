@@ -1,0 +1,41 @@
+<?php
+/**
+ * InfinityFree production database settings (EXAMPLE ONLY).
+ *
+ * On the live server, create this file as:
+ *   htdocs/config.production.php
+ *
+ * Do NOT commit config.production.php with a real password.
+ * Do NOT upload this example file with a real password.
+ */
+if (!defined('APP_ENV')) {
+    define('APP_ENV', 'production');
+}
+if (!defined('DB_SERVER')) {
+    define('DB_SERVER', 'sql110.infinityfree.com');
+}
+if (!defined('DB_HOST')) {
+    define('DB_HOST', 'sql110.infinityfree.com');
+}
+if (!defined('DB_PORT')) {
+    define('DB_PORT', 3306);
+}
+if (!defined('DB_USERNAME')) {
+    define('DB_USERNAME', 'if0_42375362');
+}
+if (!defined('DB_NAME')) {
+    define('DB_NAME', 'if0_42375362_kalmoyposdb');
+}
+if (!defined('DB_PASSWORD')) {
+    // InfinityFree MySQL password = your vPanel / account password (NOT the username).
+    define('DB_PASSWORD', 'PLACE_REAL_INFINITYFREE_PASSWORD_HERE');
+}
+if (!defined('DB_SSL')) {
+    define('DB_SSL', false);
+}
+if (!defined('DB_SSL_CA')) {
+    define('DB_SSL_CA', '');
+}
+
+// Optional: force canonical site URL
+// define('base_url', 'https://kalmoypos.infinityfreeapp.com/');

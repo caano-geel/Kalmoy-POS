@@ -1,0 +1,627 @@
+/**
+ * Kalmoy POS — Global design system
+ * Times New Roman · business / accounting software appearance
+ */
+:root {
+    --ash-font: "Times New Roman", Times, serif;
+    --primary: #2563eb;
+    --success: #15803d;
+    --danger: #b91c1c;
+    --warning: #b45309;
+    --info: #0369a1;
+    --dark: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --border-radius: 8px;
+    --border-radius-lg: 10px;
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.12);
+    --row-odd: #ffffff;
+    --row-even: #f7f9fc;
+    --row-hover: #edf5ff;
+    --money-profit: #2d8a4e;
+    --money-loss: #c45c5c;
+    --money-revenue: #0e7490;
+}
+
+html,
+body,
+.wrapper,
+.main-header,
+.main-sidebar,
+.content-wrapper,
+.card,
+.card-header,
+.card-body,
+.card-title,
+.card-footer,
+.table,
+.modal,
+.modal-title,
+.modal-body,
+.form-control,
+.btn,
+.badge,
+.dropdown-menu,
+.dropdown-item,
+.nav-link,
+.brand-link,
+.user-panel,
+.sidebar,
+.navbar,
+input,
+select,
+textarea,
+label,
+small,
+.dataTables_wrapper,
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate,
+.pagination,
+.page-link,
+.select2-container,
+.chartjs-render-monitor,
+.dash-panel,
+.mod-mini-stat,
+.login-box,
+.login-card,
+h1, h2, h3, h4, h5, h6, p, span, th, td, a {
+    font-family: var(--ash-font) !important;
+}
+
+/* Font Awesome / icon fonts must not inherit Times New Roman */
+.fa,
+.fas,
+.far,
+.fal,
+.fab,
+.fad,
+.ion {
+    font-family: "Font Awesome 5 Free" !important;
+    font-style: normal !important;
+    font-variant: normal !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: inline-block;
+    line-height: 1;
+}
+
+.fas,
+.fa,
+.fa-solid {
+    font-weight: 900 !important;
+}
+
+.far,
+.fa-regular {
+    font-weight: 400 !important;
+}
+
+.fab,
+.fa-brands {
+    font-family: "Font Awesome 5 Brands" !important;
+    font-weight: 400 !important;
+}
+
+body {
+    color: var(--dark);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Cards */
+.card {
+    border-radius: var(--border-radius-lg);
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+    padding: 0.55rem 0.85rem;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.card-body {
+    padding: 0.75rem 0.85rem;
+}
+
+/* Forms — compact */
+.form-control,
+.form-control-sm,
+.custom-select,
+.select2-selection {
+    border-radius: var(--border-radius) !important;
+    border-color: var(--border) !important;
+    font-size: 0.875rem !important;
+}
+
+.form-group {
+    margin-bottom: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+}
+
+/* Buttons */
+.btn {
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-sm {
+    font-size: 0.78rem;
+    padding: 0.28rem 0.55rem;
+}
+
+/* Compact status badges */
+.ash-status-badge,
+table.ash-table .badge {
+    font-size: 0.62rem !important;
+    font-weight: 700 !important;
+    padding: 0.18rem 0.45rem !important;
+    border-radius: 999px !important;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+
+.ash-status-active { background: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; }
+.ash-status-inactive { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+.ash-status-open { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.ash-status-packed { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.ash-status-delivery { background: #fef3c7; color: var(--warning); border: 1px solid #fde68a; }
+.ash-status-delivered { background: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; }
+.ash-status-cancelled { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+.ash-status-paid-yes { background: #dcfce7; color: var(--success); }
+.ash-status-paid-no { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+.ash-stock-in { background: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; }
+.ash-stock-low { background: #fef3c7; color: var(--warning); border: 1px solid #fde68a; }
+.ash-stock-out { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+
+/* Circular icon action buttons */
+.ash-table-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.ash-icon-btn {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.68rem;
+    border: 1px solid transparent;
+    background: #f8fafc;
+    color: #475569;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    text-decoration: none !important;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.ash-icon-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+}
+
+.ash-icon-btn-view { background: #f1f5f9; color: #334155; border-color: #e2e8f0; }
+.ash-icon-btn-view:hover { background: #e2e8f0; color: #1e293b; }
+.ash-icon-btn-edit { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+.ash-icon-btn-edit:hover { background: #dbeafe; color: #1d4ed8; }
+.ash-icon-btn-delete { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+.ash-icon-btn-delete:hover { background: #fee2e2; color: #991b1b; }
+.ash-icon-btn-pay { background: #ecfdf5; color: #15803d; border-color: #bbf7d0; }
+.ash-icon-btn-pay:hover { background: #dcfce7; }
+.ash-icon-btn-restore { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.ash-icon-btn-download { background: #ecfeff; color: #0e7490; border-color: #a5f3fc; }
+.ash-icon-btn-download:hover { background: #cffafe; }
+
+/* Product cell */
+.ash-product-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.ash-product-thumb {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    background: #f8fafc;
+}
+
+.ash-product-thumb-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    border: 1px solid var(--border);
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.ash-product-meta { min-width: 0; }
+.ash-product-name { font-weight: 700; font-size: 0.82rem; line-height: 1.2; color: var(--dark); }
+.ash-product-sub { font-size: 0.68rem; color: var(--muted); line-height: 1.25; }
+.ash-product-sub code { font-size: 0.66rem; background: #f1f5f9; padding: 0 0.2rem; border-radius: 3px; }
+
+.ash-text-bold { font-weight: 700; }
+.ash-text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    line-height: 1.3;
+    font-size: 0.78rem;
+    color: #475569;
+    max-width: 220px;
+}
+
+.ash-email-short {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.78rem;
+    color: #475569;
+}
+
+/* KPI strip (sales report) */
+.ash-kpi-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 0.65rem;
+}
+
+.ash-kpi-item {
+    flex: 1 1 0;
+    min-width: 100px;
+    padding: 0.45rem 0.65rem;
+    border-right: 1px solid var(--border);
+    text-align: center;
+}
+
+.ash-kpi-item:last-child { border-right: none; }
+.ash-kpi-label {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 0.1rem;
+}
+.ash-kpi-value {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--dark);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+/* Compact filter bar */
+.ash-filter-compact {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: 0.45rem 0.55rem;
+    margin-bottom: 0.65rem;
+}
+
+.ash-filter-compact .form-group { margin-bottom: 0; }
+.ash-filter-compact .row { align-items: flex-end; }
+
+.ash-export-group {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.ash-export-group .btn {
+    flex: 1;
+    min-width: 70px;
+    font-size: 0.72rem;
+    padding: 0.3rem 0.4rem;
+}
+
+/* Permissions cards */
+.ash-perm-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0.55rem 0.65rem;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+}
+
+.ash-perm-search {
+    flex: 1;
+    min-width: 180px;
+    max-width: 320px;
+}
+
+.ash-perm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.65rem;
+}
+
+.ash-perm-card {
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.ash-perm-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0.65rem;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+}
+
+.ash-perm-card-head h6 {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.ash-perm-card-body {
+    padding: 0.45rem 0.65rem 0.55rem;
+}
+
+.ash-perm-card-body.collapsed { display: none; }
+
+.ash-perm-card .custom-control-label {
+    font-size: 0.78rem;
+}
+
+.ash-perm-intro {
+    padding: 0.85rem 1rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: var(--border-radius);
+    color: #1e3a5f;
+}
+
+.ash-perm-intro-title {
+    font-weight: 700;
+    font-size: 0.88rem;
+    margin-bottom: 0.35rem;
+}
+
+.ash-perm-intro-list {
+    padding-left: 1.15rem;
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+.ash-perm-intro-list li + li {
+    margin-top: 0.25rem;
+}
+
+.ash-perm-role-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 0.15rem;
+}
+
+.card-header .ash-perm-role-label {
+    margin-top: 0.2rem;
+}
+
+.mod-section-body > .ash-perm-role-label {
+    color: #475569;
+}
+
+/* Login glassmorphism */
+body.login-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+body.login-page #page-title {
+    text-shadow: 0 2px 12px rgba(0,0,0,.35);
+    font-size: clamp(1.35rem, 4vw, 2.5rem) !important;
+    margin-bottom: 0.75rem !important;
+    padding: 0.5rem 1rem !important;
+}
+
+body.login-page .login-box {
+    width: 400px;
+    max-width: 94vw;
+}
+
+body.login-page .ash-login-glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    animation: ashLoginFade 0.6s ease;
+}
+
+@keyframes ashLoginFade {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+body.login-page .ash-login-glass .card-body {
+    padding: 1.25rem 1.35rem 1rem;
+    background: transparent;
+}
+
+body.login-page .system-logo-login img {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.2));
+}
+
+body.login-page .login-box-msg {
+    color: #fff;
+    font-weight: 600;
+    text-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+
+body.login-page .form-control {
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(255,255,255,.4) !important;
+}
+
+body.login-page .input-group-text {
+    background: rgba(255,255,255,.85);
+    border-color: rgba(255,255,255,.4);
+}
+
+body.login-page .btn-login-submit {
+    position: relative;
+    min-height: 38px;
+    font-weight: 700;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.login-page .btn-login-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+}
+
+body.login-page .btn-login-submit .spinner-border {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+}
+
+body.login-page .ash-login-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+}
+
+body.login-page .ash-home-link {
+    color: #fff;
+    font-size: 1.1rem;
+    opacity: 0.9;
+    transition: opacity 0.15s;
+}
+
+body.login-page .ash-home-link:hover { opacity: 1; color: #fff; }
+
+body.login-page .custom-control-label {
+    color: rgba(255,255,255,.92);
+    font-size: 0.82rem;
+}
+
+body.login-page a.ash-forgot-link {
+    color: rgba(255,255,255,.85);
+    font-size: 0.78rem;
+}
+
+body.login-page a.ash-forgot-link:hover { color: #fff; }
+
+/* Dashboard compact tables — no horizontal scroll */
+table.dash-compact-table.ash-table {
+    min-width: 0 !important;
+    width: 100%;
+    font-size: 0.75rem;
+}
+
+table.dash-compact-table thead th {
+    font-size: 0.6rem;
+    padding: 0.35rem 0.5rem;
+}
+
+table.dash-compact-table tbody td {
+    padding: 0.35rem 0.5rem;
+}
+
+.dash-panel .ash-table-wrap {
+    overflow-x: hidden;
+}
+
+/* Softer money colors */
+.ash-money-profit { color: var(--money-profit) !important; }
+.ash-money-loss { color: var(--money-loss) !important; }
+.ash-money-revenue { color: var(--money-revenue) !important; }
+
+/* Print */
+@media print {
+    html, body, .table, th, td {
+        font-family: "Times New Roman", Times, serif !important;
+    }
+}
+
+/* Mobile */
+@media (max-width: 767.98px) {
+    .ash-kpi-strip { flex-direction: column; }
+    .ash-kpi-item {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+        padding: 0.4rem 0.65rem;
+    }
+    .ash-kpi-item:last-child { border-bottom: none; }
+    .ash-kpi-value { font-size: 0.85rem; }
+    .ash-perm-grid { grid-template-columns: 1fr; }
+    .ash-icon-btn { width: 28px; height: 28px; }
+    .card-body { padding: 0.55rem 0.65rem; }
+}
