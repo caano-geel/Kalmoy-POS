@@ -47,7 +47,7 @@
                             <a href="./?p=my_account" class="text-dark  nav-link text-white"><b> Hi, <?php echo $_settings->userdata('firstname')?>!</b></a>
                             <a href="logout.php" class="text-dark  nav-link text-white"><i class="fa fa-sign-out-alt"></i></a>
                         <?php else: ?>
-                        <button class="btn btn-outline-dark ml-2" id="login-btn" type="button">Login</button>
+                        <button class="btn btn-outline-dark ml-2" id="login-btn" type="button">Login Here</button>
                         <?php endif; ?>
                     </div>
                 </div>

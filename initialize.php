@@ -3,9 +3,9 @@
  * Application bootstrap / environment loader.
  *
  * Configuration priority:
- * 1. config.local.php (or legacy initialize.local.php) on localhost
+ * 1. config.local.php (or legacy initialize.local.php) on XAMPP / when file exists locally
  * 2. .env / process environment variables (optional)
- * 3. config.production.php (or legacy initialize.production.php) on InfinityFree / production
+ * 3. config.production.php (or legacy initialize.production.php) on kalmoypos.com / InfinityFree
  * 4. Safe built-in defaults (local XAMPP or InfinityFree host/user/db WITHOUT password)
  *
  * Note: config.php is the main application include (helpers + DB). It requires this file.
@@ -32,15 +32,10 @@ app_set_kenya_timezone();
 
 require_once __DIR__ . '/inc/load_env.php';
 
-$__http_host = strtolower($_SERVER['HTTP_HOST'] ?? 'localhost');
-$__is_local = in_array($__http_host, array('localhost', '127.0.0.1'), true)
-    || strpos($__http_host, 'localhost:') === 0
-    || strpos($__http_host, '127.0.0.1:') === 0;
-
-if ($__is_local && !app_is_infinityfree_request()) {
+if (app_should_use_local_config()) {
     if (is_file(__DIR__ . '/config.local.php')) {
         require_once __DIR__ . '/config.local.php';
-    } elseif (is_file(__DIR__ . '/initialize.local.php')) {
+    } elseif (app_is_local_host_request() && is_file(__DIR__ . '/initialize.local.php')) {
         require_once __DIR__ . '/initialize.local.php';
     }
 }
@@ -52,12 +47,12 @@ if (!defined('APP_ENV')) {
     if ($env_app !== '') {
         define('APP_ENV', $env_app);
     } else {
-        define('APP_ENV', $__is_local ? 'local' : 'production');
+        define('APP_ENV', app_should_use_local_config() ? 'local' : 'production');
     }
 }
 
 if (!defined('DB_SERVER')) {
-    if (app_is_infinityfree_request() || (!app_is_local_request() && APP_ENV === 'production')) {
+    if (app_is_production_request() || (!app_is_local_request() && APP_ENV === 'production')) {
         if (is_file(__DIR__ . '/config.production.php')) {
             require_once __DIR__ . '/config.production.php';
         } elseif (is_file(__DIR__ . '/initialize.production.php')) {
@@ -79,7 +74,7 @@ if (!defined('DB_SERVER') && !app_is_local_request()) {
 }
 
 if (!defined('DB_SERVER')) {
-    if (APP_ENV === 'local' || $__is_local) {
+    if (APP_ENV === 'local' || app_should_use_local_config()) {
         define('DB_SERVER', 'localhost');
         define('DB_USERNAME', 'root');
         define('DB_PASSWORD', '');

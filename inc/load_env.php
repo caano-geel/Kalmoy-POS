@@ -9,16 +9,59 @@ if (!defined('base_app')) {
     return;
 }
 
+if (!function_exists('app_is_local_host_request')) {
+    function app_is_local_host_request()
+    {
+        $host = strtolower($_SERVER['HTTP_HOST'] ?? 'localhost');
+        return in_array($host, array('localhost', '127.0.0.1'), true)
+            || strpos($host, 'localhost:') === 0
+            || strpos($host, '127.0.0.1:') === 0;
+    }
+}
+
+if (!function_exists('app_has_local_config_file')) {
+    function app_has_local_config_file()
+    {
+        return is_file(base_app . 'config.local.php');
+    }
+}
+
+if (!function_exists('app_is_production_request')) {
+    function app_is_production_request()
+    {
+        if (app_is_infinityfree_request()) {
+            return true;
+        }
+        $host = strtolower($_SERVER['HTTP_HOST'] ?? '');
+        $host = preg_replace('/:\d+$/', '', $host);
+        return in_array($host, array('kalmoypos.com', 'www.kalmoypos.com'), true);
+    }
+}
+
+if (!function_exists('app_should_use_local_config')) {
+    /**
+     * True on XAMPP/dev: localhost URL, or gitignored config.local.php present.
+     * config.local.php is never deployed to InfinityFree (see deploy.yml).
+     */
+    function app_should_use_local_config()
+    {
+        if (app_is_infinityfree_request()) {
+            return false;
+        }
+        if (app_has_local_config_file()) {
+            return true;
+        }
+        return app_is_local_host_request();
+    }
+}
+
 if (!function_exists('app_is_local_request')) {
     function app_is_local_request()
     {
         if (defined('APP_ENV') && APP_ENV === 'local') {
             return true;
         }
-        $host = strtolower($_SERVER['HTTP_HOST'] ?? 'localhost');
-        return in_array($host, array('localhost', '127.0.0.1'), true)
-            || strpos($host, 'localhost:') === 0
-            || strpos($host, '127.0.0.1:') === 0;
+        return app_should_use_local_config();
     }
 }
 

@@ -131,7 +131,7 @@ class DBConnection
 
     public function __destruct()
     {
-        if ($this->conn) {
+        if ($this->conn instanceof mysqli) {
             $this->conn->close();
         }
     }
