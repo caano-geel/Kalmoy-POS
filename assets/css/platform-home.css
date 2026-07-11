@@ -507,6 +507,10 @@ body.platform-nav-open {
         pointer-events: auto;
     }
 
+    body.platform-nav-open .platform-header {
+        z-index: 1060;
+    }
+
     .platform-navbar-drawer {
         position: fixed;
         top: 0;
