@@ -86,12 +86,31 @@
     cursor: pointer;
     position: relative;
     transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+  .notif-card-wrap {
+    position: relative;
+    margin-bottom: .4rem;
+  }
+  .notif-card-wrap:last-child {
+    margin-bottom: 0;
+  }
+  .notif-card-wrap .notif-card {
+    margin-bottom: 0;
+    width: 100%;
+  }
+  .notif-card-wrap .notif-dismiss {
+    z-index: 2;
   }
   .notif-card:last-child { margin-bottom: 0; }
-  .notif-card:hover {
+  .notif-card:hover,
+  .notif-card:focus {
     box-shadow: 0 4px 12px rgba(0,0,0,.08);
     transform: translateY(-1px);
     border-color: rgba(37,99,235,.15);
+    text-decoration: none;
+    color: inherit;
   }
   .notif-card.notif-unread {
     border-left: 3px solid #2563eb;
@@ -150,6 +169,7 @@
     cursor: pointer;
     padding: 0;
   }
+  .notif-card-wrap:hover .notif-dismiss,
   .notif-card:hover .notif-dismiss { opacity: 1; }
   .notif-dismiss:hover {
     background: #fee2e2;
@@ -168,6 +188,90 @@
     font-weight: 600;
     border-radius: 8px;
     padding: .35rem .65rem;
+  }
+  .notification-item {
+    text-decoration: none;
+    color: inherit;
+  }
+  .notification-item:hover,
+  .notification-item:focus {
+    text-decoration: none;
+    color: inherit;
+  }
+  .notification-item:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  }
+  @media (max-width: 991.98px) {
+    #nav-notifications-wrap .dropdown-menu.notif-center-dropdown {
+      position: fixed;
+      top: 3.35rem;
+      left: 14px;
+      right: 14px;
+      width: auto !important;
+      max-width: none !important;
+      margin: 0;
+      transform: none !important;
+      max-height: calc(100vh - 4.25rem);
+      max-height: calc(100dvh - 4.25rem);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #nav-notifications-wrap.show .dropdown-menu.notif-center-dropdown,
+    #nav-notifications-wrap.show .dropdown-menu.notif-center-dropdown.show {
+      display: flex !important;
+    }
+    .notif-center-header {
+      padding: .65rem .75rem .55rem;
+      flex-shrink: 0;
+    }
+    .notif-center-title {
+      font-size: .88rem;
+    }
+    .notif-center-subtitle {
+      font-size: .72rem;
+    }
+    .notif-center-header-actions .btn {
+      font-size: .66rem;
+      padding: .18rem .45rem;
+    }
+    .notif-center-list {
+      max-height: min(240px, 38vh);
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: .45rem;
+    }
+    .notif-card {
+      padding: .48rem .52rem;
+      gap: .45rem;
+    }
+    .notif-card-title {
+      font-size: .76rem;
+    }
+    .notif-card-desc {
+      font-size: .68rem;
+    }
+    .notif-card-time {
+      font-size: .64rem;
+    }
+    .notif-card-icon {
+      width: 26px;
+      height: 26px;
+      font-size: .72rem;
+    }
+    .notif-center-footer {
+      padding: .5rem .55rem .55rem;
+      flex-shrink: 0;
+    }
+    .notif-center-footer .btn {
+      font-size: .72rem;
+      padding: .32rem .55rem;
+    }
   }
 </style>
 <!-- Navbar -->
@@ -286,10 +390,55 @@
           if(t.indexOf('backup') >= 0) return { icon: 'fa-database', cls: 'notif-icon-success' };
           if(t.indexOf('sale') >= 0) return { icon: 'fa-coins', cls: 'notif-icon-success' };
           if(t.indexOf('expense') >= 0) return { icon: 'fa-file-invoice-dollar', cls: 'notif-icon-info' };
+          if(t.indexOf('debt') >= 0 || t.indexOf('overdue') >= 0 || t.indexOf('credit') >= 0) return { icon: 'fa-hand-holding-usd', cls: 'notif-icon-warning' };
           if(type === 'success') return { icon: 'fa-check-circle', cls: 'notif-icon-success' };
           if(type === 'warning') return { icon: 'fa-exclamation-triangle', cls: 'notif-icon-warning' };
           if(type === 'danger') return { icon: 'fa-times-circle', cls: 'notif-icon-danger' };
           return { icon: 'fa-info-circle', cls: 'notif-icon-info' };
+        }
+        function resolveNotificationLink(n){
+          var adminBase = _base_url_ + 'admin/?page=';
+          var allUrl = adminBase + 'notifications';
+          var link = n && n.link ? String(n.link).trim() : '';
+          if(link) return link;
+          var ref = n && n.ref_key ? String(n.ref_key) : '';
+          var title = n && n.title ? String(n.title).toLowerCase() : '';
+          var m;
+          if(ref){
+            if(/^stock_out_\d+$/.test(ref)) return adminBase + 'inventory&stock_filter=out';
+            if(/^stock_low_\d+$/.test(ref)) return adminBase + 'inventory&stock_filter=low';
+            if(/^expiry_\d+$/.test(ref)) return adminBase + 'inventory';
+            if(/^pending_orders_\d+$/.test(ref)) return adminBase + 'orders&status=0';
+            m = ref.match(/^sale_(\d+)$/);
+            if(m) return adminBase + 'orders/view_order&id=' + m[1];
+            m = ref.match(/^expense_(\d+)$/);
+            if(m) return adminBase + 'expenses/manage_expense&id=' + m[1];
+            if(/^backup_/.test(ref)) return adminBase + 'backup';
+            m = ref.match(/^debt_overdue_(\d+)$/);
+            if(m) return adminBase + 'debt/statement&client_id=' + m[1];
+            if(/^debt_sale_/.test(ref)) return adminBase + 'debt/customers';
+            if(/^debt_pay_/.test(ref)) return adminBase + 'debt/history';
+          }
+          if(title.indexOf('out of stock') >= 0) return adminBase + 'inventory&stock_filter=out';
+          if(title.indexOf('low stock') >= 0) return adminBase + 'inventory&stock_filter=low';
+          if(title.indexOf('expir') >= 0) return adminBase + 'inventory';
+          if(title.indexOf('open order') >= 0 || title.indexOf('pending order') >= 0) return adminBase + 'orders&status=0';
+          if(title.indexOf('overdue') >= 0) return adminBase + 'debt/overdue';
+          if(title.indexOf('debt payment') >= 0 || (title.indexOf('payment') >= 0 && title.indexOf('debt') >= 0)) return adminBase + 'debt/history';
+          if(title.indexOf('credit sale') >= 0 || title.indexOf('debt') >= 0) return adminBase + 'debt/customers';
+          if(title.indexOf('expense') >= 0) return adminBase + 'expenses';
+          if(title.indexOf('sale') >= 0) return adminBase + 'sales';
+          if(title.indexOf('backup') >= 0) return adminBase + 'backup';
+          if(title.indexOf('customer') >= 0) return adminBase + 'clients';
+          return allUrl;
+        }
+        function closeNotifDropdown(){
+          var $wrap = $('#nav-notifications-wrap');
+          if($wrap.hasClass('show')){
+            $wrap.removeClass('show');
+            $('#nav-notifications-menu').removeClass('show');
+            $('#nav-notifications-toggle').attr('aria-expanded', 'false');
+          }
         }
         function renderNotifications(resp){
           if(!resp || resp.status !== 'success') return;
@@ -308,16 +457,18 @@
           } else {
             items.forEach(function(n){
               var vis = notifVisual(n.title, n.type);
-              var link = n.link ? n.link : '#';
+              var link = resolveNotificationLink(n);
               var unreadCls = n.is_read == 0 ? ' notif-unread' : '';
-              html += '<div class="notif-card notification-item'+unreadCls+'" data-id="'+n.id+'" data-link="'+escapeHtml(link)+'">'
+              html += '<div class="notif-card-wrap">'
+                +'<a href="'+escapeHtml(link)+'" class="notif-card notification-item'+unreadCls+'" data-id="'+n.id+'">'
                 +'<div class="notif-card-icon '+vis.cls+'"><i class="fas '+vis.icon+'"></i></div>'
                 +'<div class="notif-card-body">'
                 +'<div class="notif-card-title">'+escapeHtml(n.title)+'</div>'
                 +'<div class="notif-card-desc">'+escapeHtml(n.message)+'</div>'
                 +'<div class="notif-card-time">'+escapeHtml(relativeTime(n.date_created))+'</div>'
                 +'</div>'
-                +'<button type="button" class="notif-dismiss notif-delete" data-id="'+n.id+'" title="Dismiss" aria-label="Dismiss"><i class="fas fa-times"></i></button>'
+                +'</a>'
+                +'<button type="button" class="notif-dismiss notif-delete" data-id="'+n.id+'" title="Dismiss" aria-label="Dismiss notification"><i class="fas fa-times"></i></button>'
                 +'</div>';
             });
           }
@@ -327,17 +478,29 @@
           $.getJSON(_base_url_+'classes/Master.php?f=get_notifications', {limit: 5}, renderNotifications);
         }
         function markAllRead(e){
-          if(e) e.preventDefault();
-          $.post(_base_url_+'classes/Master.php?f=mark_all_notifications_read', {}, loadNotifications, 'json');
+          if(e){
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          $.post(_base_url_+'classes/Master.php?f=mark_all_notifications_read', {}, function(){
+            loadNotifications();
+            closeNotifDropdown();
+          }, 'json');
         }
         loadNotifications();
         setInterval(loadNotifications, 60000);
+        $('#nav-notifications-menu').on('click', '.notif-center-header-actions a, .notif-center-header-actions button, .notif-center-footer a, .notif-center-footer button', function(e){
+          e.stopPropagation();
+        });
         $(document).on('click', '.notification-item', function(e){
-          if($(e.target).closest('.notif-delete').length) return;
-          var id = $(this).data('id');
-          var link = $(this).data('link');
+          e.preventDefault();
+          e.stopPropagation();
+          var $item = $(this);
+          var id = $item.data('id');
+          var link = $item.attr('href') || resolveNotificationLink({ link: '' });
+          closeNotifDropdown();
           $.post(_base_url_+'classes/Master.php?f=mark_notification_read', {id:id}, function(){
-            if(link && link !== '#') window.location.href = link;
+            if(link) window.location.href = link;
             else loadNotifications();
           }, 'json');
         });

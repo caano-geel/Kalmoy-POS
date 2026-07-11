@@ -1629,6 +1629,42 @@ function notifications_list($limit = 10, $unread_only = false){
     }
     return $items;
 }
+function notification_resolve_link(array $row){
+    $link = isset($row['link']) ? trim((string)$row['link']) : '';
+    $ref = isset($row['ref_key']) ? trim((string)$row['ref_key']) : '';
+    $title = strtolower(stripslashes(isset($row['title']) ? (string)$row['title'] : ''));
+    $admin = base_url.'admin/?page=';
+    $all = base_url.'admin/?page=notifications';
+
+    if($ref !== ''){
+        if(preg_match('/^stock_out_\d+$/', $ref)) return $admin.'inventory&stock_filter=out';
+        if(preg_match('/^stock_low_\d+$/', $ref)) return $admin.'inventory&stock_filter=low';
+        if(preg_match('/^expiry_\d+$/', $ref)) return $admin.'inventory';
+        if(preg_match('/^pending_orders_\d+$/', $ref)) return $admin.'orders&status=0';
+        if(preg_match('/^sale_(\d+)$/', $ref, $m)) return $admin.'orders/view_order&id='.(int)$m[1];
+        if(preg_match('/^expense_(\d+)$/', $ref, $m)) return $admin.'expenses/manage_expense&id='.(int)$m[1];
+        if(preg_match('/^backup_/', $ref)) return $admin.'backup';
+        if(preg_match('/^debt_overdue_(\d+)$/', $ref, $m)) return $admin.'debt/statement&client_id='.(int)$m[1];
+        if(preg_match('/^debt_sale_/', $ref)) return $admin.'debt/customers';
+        if(preg_match('/^debt_pay_/', $ref)) return $admin.'debt/history';
+    }
+
+    if($link !== '') return $link;
+
+    if(strpos($title, 'out of stock') !== false) return $admin.'inventory&stock_filter=out';
+    if(strpos($title, 'low stock') !== false) return $admin.'inventory&stock_filter=low';
+    if(strpos($title, 'expir') !== false) return $admin.'inventory';
+    if(strpos($title, 'open order') !== false || strpos($title, 'pending order') !== false) return $admin.'orders&status=0';
+    if(strpos($title, 'overdue') !== false) return $admin.'debt/overdue';
+    if(strpos($title, 'debt payment') !== false || (strpos($title, 'payment') !== false && strpos($title, 'debt') !== false)) return $admin.'debt/history';
+    if(strpos($title, 'credit sale') !== false || strpos($title, 'debt') !== false) return $admin.'debt/customers';
+    if(strpos($title, 'expense') !== false) return $admin.'expenses';
+    if(strpos($title, 'sale') !== false) return $admin.'sales';
+    if(strpos($title, 'backup') !== false) return $admin.'backup';
+    if(strpos($title, 'customer') !== false) return $admin.'clients';
+
+    return $all;
+}
 function notifications_sync_system(){
     if(!notifications_table_enabled()) return;
     global $conn;

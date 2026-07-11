@@ -85,11 +85,11 @@ body.sidebar-modern-ui.ash-sidebar-scroll-lock .main-header {
         font-size: .72rem;
     }
 
-    .notif-center-dropdown {
-        width: calc(100vw - 1rem) !important;
-        max-width: calc(100vw - 1rem) !important;
-        right: .5rem !important;
-        left: auto !important;
+    #nav-notifications-wrap .notif-center-dropdown {
+        left: 14px !important;
+        right: 14px !important;
+        width: auto !important;
+        max-width: none !important;
     }
 }
 
