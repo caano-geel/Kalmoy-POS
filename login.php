@@ -12,7 +12,7 @@
         </button>
     </h3>
         <div class="col-lg-12">
-            <h3 class="text-center">Login here please</h3>
+            <h3 class="text-center">Login</h3>
             <hr>
             <form action="" id="login-form">
                 <div class="form-group">
