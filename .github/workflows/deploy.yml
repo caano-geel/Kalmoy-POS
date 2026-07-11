@@ -1,11 +1,16 @@
-# Deploy Kalmoy POS to InfinityFree (kalmoypos.com/htdocs/) via FTP.
+# Deploy Kalmoy POS to InfinityFree custom-domain document root.
 #
-# Incremental sync: SamKirkland/FTP-Deploy-Action compares SHA-256 hashes against
-# .ftp-deploy-sync-state.json in the deployment directory and uploads only changed files.
-# Do NOT add the sync state file to the exclude list.
+# Incremental sync:
+# SamKirkland/FTP-Deploy-Action compares local file hashes with
+# .ftp-deploy-sync-state.json stored inside kalmoypos.com/htdocs/.
+# Do not exclude or manually delete the sync-state file.
 #
-# Protected on the server (never deployed or deleted by this workflow):
-# config.production.php, initialize.production.php, .env, uploads/, backups/, cache/, logs/
+# Production-only and runtime files are protected from GitHub deployment:
+# config.production.php, initialize.production.php, .env, uploads/,
+# backups/, cache/, logs/.
+#
+# Local-only and diagnostic files must never reach production:
+# config.local.php, initialize.local.php, db-check.php.
 
 name: Deploy to InfinityFree
 
@@ -36,14 +41,19 @@ jobs:
           protocol: ftp
           port: 21
 
-          # Local project root
+          # Local GitHub repository root
           local-dir: ./
 
-          # IMPORTANT: Deploy directly into the custom domain document root
+          # Custom-domain document root shown in InfinityFree File Manager:
+          # Home/kalmoypos.com/htdocs/
           server-dir: ./kalmoypos.com/htdocs/
 
+          # Required for fast incremental deployments
           state-name: .ftp-deploy-sync-state.json
+
+          # Never wipe the production directory
           dangerous-clean-slate: false
+
           timeout: 120000
           log-level: standard
 
@@ -51,12 +61,15 @@ jobs:
             **/.git*
             **/.git*/**
             **/.github/**
+
             **/.env
             **/.env.*
             **/config.local.php
-            **/config.production.php
             **/initialize.local.php
+            **/config.production.php
             **/initialize.production.php
+            **/db-check.php
+
             **/DATABASE FILE/**
             **/database/**
             **/backups/**
@@ -66,17 +79,21 @@ jobs:
             **/tmp/**
             **/temp/**
             **/logs/**
+
             **/*.sql
             **/*.log
             **/*.zip
             **/*.rar
             **/*.example
+
             **/.gitignore
             **/OFFLINE_SETUP.md
             **/LOCAL_SETUP.md
             **/DEPLOY_INFINITYFREE.md
             **/README.md
+
             **/tools/**
             **/build/**
+
             **/composer.json
             **/composer.lock
