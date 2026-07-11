@@ -1,8 +1,8 @@
 # Deploy Kalmoy POS to InfinityFree (kalmoypos.com/htdocs/) via FTP.
 #
 # Incremental sync: SamKirkland/FTP-Deploy-Action compares SHA-256 hashes against
-# htdocs/.ftp-deploy-sync-state.json on the server and uploads only changed files.
-# Do NOT add the sync state file to the exclude list — that forces a full re-upload.
+# .ftp-deploy-sync-state.json in the deployment directory and uploads only changed files.
+# Do NOT add the sync state file to the exclude list.
 #
 # Protected on the server (never deployed or deleted by this workflow):
 # config.production.php, initialize.production.php, .env, uploads/, backups/, cache/, logs/
@@ -35,12 +35,18 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
+
+          # Local project root
           local-dir: ./
-          server-dir: ./htdocs/
+
+          # IMPORTANT: Deploy directly into the custom domain document root
+          server-dir: ./kalmoypos.com/htdocs/
+
           state-name: .ftp-deploy-sync-state.json
           dangerous-clean-slate: false
           timeout: 120000
           log-level: standard
+
           exclude: |
             **/.git*
             **/.git*/**
