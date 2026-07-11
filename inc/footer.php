@@ -56,12 +56,14 @@
   })
 </script>
 <!-- Footer-->
+<?php if (empty($is_platform_public)): ?>
 <footer class="py-4 bg-gradient-pink">
             <div class="container">
-              <p class="m-0 text-center text-white">Copyright &copy; <?php echo $_settings->info('short_name') ?> 2021</p>
-              <p class="m-0 text-center text-white">Developed By: <a href="mailto:abdullahiomarsalad@gmail.com" target="_blank">Abdullahi Omer Salad</a></p>
+              <p class="m-0 text-center text-white">Copyright &copy; <?php echo $_settings->info('short_name') ?> <?php echo date('Y') ?></p>
+              <p class="m-0 text-center text-white">Powered by <a href="./" class="text-white"><u>Kalmoy POS</u></a> &mdash; Kalmoy Tech Solutions</p>
           </div>
         </footer>
+<?php endif; ?>
 
    
     <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->

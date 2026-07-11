@@ -10,8 +10,12 @@
 </script>
 <?php endif;?>
 <body>
+<?php
+$page = isset($_GET['p']) ? $_GET['p'] : 'home';
+$is_platform_home = ($page === 'home');
+$is_platform_public = ($page === 'home' || $page === 'platform-privacy');
+?>
 <?php require_once('inc/topBarNav.php') ?>
-<?php $page = isset($_GET['p']) ? $_GET['p'] : 'home';  ?>
 <?php 
     if(!file_exists($page.".php") && !is_dir($page)){
         include '404.html';
