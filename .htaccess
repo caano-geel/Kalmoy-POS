@@ -6,14 +6,14 @@ RewriteEngine On
 # Block sensitive bootstrap / credential files
 RewriteRule ^(initialize\.(local|production)|config\.(local|production))\.php$ - [F,L]
 
+# SEO endpoints (before static file passthrough)
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+RewriteRule ^robots\.txt$ robots.php [L]
+
 # Allow existing files and folders (images, css, js, uploads)
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
-
-# SEO endpoints
-RewriteRule ^sitemap\.xml$ sitemap.php [L]
-RewriteRule ^robots\.txt$ robots.php [L]
 </IfModule>
 
 <FilesMatch "^(initialize\.local\.php|initialize\.production\.php|config\.local\.php|config\.production\.php|\.env|\.env\.infinityfree|\.gitignore)$">
