@@ -1901,5 +1901,6 @@ function ash_swal_access_denied_script($redirect_url){
         'redirect' => $redirect_url,
     ));
 }
+require_once __DIR__ . '/inc/seo.php';
 ob_end_flush();
 ?>

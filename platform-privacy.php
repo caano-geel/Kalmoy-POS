@@ -5,7 +5,6 @@
 $platform_email = 'abdullahiomarsalad@gmail.com';
 $platform_privacy_updated = 'July 11, 2026';
 ?>
-<link rel="stylesheet" href="<?php echo base_url ?>assets/css/platform-home.css">
 <script>document.body.classList.add('platform-site');</script>
 
 <main class="platform-legal" id="top">

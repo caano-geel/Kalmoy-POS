@@ -1,4 +1,16 @@
 <?php require_once('config.php'); ?>
+<?php
+$page = isset($_GET['p']) ? trim((string) $_GET['p']) : 'home';
+$is_platform_home = ($page === 'home');
+$is_platform_public = ($page === 'home' || $page === 'platform-privacy');
+$page_exists = file_exists($page . '.php') || is_dir($page);
+if (!$page_exists) {
+    http_response_code(404);
+    $seo_context = seo_build_context('404', $_GET);
+} else {
+    $seo_context = seo_build_context($page, $_GET);
+}
+?>
 <!DOCTYPE html>
 <html lang="en-KE">
 <?php require_once('inc/header.php') ?>
@@ -10,14 +22,9 @@
 </script>
 <?php endif;?>
 <body>
-<?php
-$page = isset($_GET['p']) ? $_GET['p'] : 'home';
-$is_platform_home = ($page === 'home');
-$is_platform_public = ($page === 'home' || $page === 'platform-privacy');
-?>
 <?php require_once('inc/topBarNav.php') ?>
 <?php 
-    if(!file_exists($page.".php") && !is_dir($page)){
+    if(!$page_exists){
         include '404.html';
     }else{
     if(is_dir($page))

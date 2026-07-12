@@ -1,4 +1,11 @@
 <?php require_once('../config.php'); ?>
+<?php
+$admin_page = isset($_GET['page']) ? trim((string) $_GET['page']) : 'home';
+$admin_page_exists = file_exists($admin_page . '.php') || is_dir($admin_page);
+if (!$admin_page_exists) {
+    http_response_code(404);
+}
+?>
  <!DOCTYPE html>
 <html lang="en-KE" class="" style="height: auto;">
 <?php require_once('inc/header.php') ?>
@@ -7,7 +14,7 @@
      <?php require_once('inc/topBarNav.php') ?>
      <?php require_once('inc/navigation.php') ?>
               
-     <?php $page = isset($_GET['page']) ? $_GET['page'] : 'home';  ?>
+     <?php $page = $admin_page; ?>
       <!-- Content Wrapper. Contains page content -->
       <div class="content-wrapper  pt-3" style="min-height: 567.854px;">
      
@@ -20,7 +27,7 @@
                   echo '<script>location.replace("'.$access['url'].'");</script>';
               }elseif($access['status'] === 'deny'){
                   echo ash_swal_access_denied_script($access['url']);
-              }elseif(!file_exists($page.".php") && !is_dir($page)){
+              }elseif(!$admin_page_exists){
                   include '404.html';
               }else{
                 if(is_dir($page))

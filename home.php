@@ -11,14 +11,13 @@ $platform_contact_url = 'mailto:' . $platform_email
     . '?subject=' . rawurlencode('Kalmoy POS Inquiry')
     . '&body=' . rawurlencode("Hello Kalmoy Tech Solutions,\n\nI have a question about Kalmoy POS.\n\nBusiness name:\nMy question:\nPhone number:\n\nThank you.");
 ?>
-<link rel="stylesheet" href="<?php echo base_url ?>assets/css/platform-home.css">
 <script>document.body.classList.add('platform-site');</script>
 
 <section class="platform-hero" id="top">
     <div class="container platform-hero-inner">
         <div class="row align-items-center platform-hero-row">
             <div class="col-lg-7 platform-hero-content platform-animate">
-                <h1>Professional retail management for modern businesses</h1>
+                <h1>Kalmoy POS — Professional retail management for modern businesses</h1>
                 <p class="platform-hero-lead">
                     Sell faster, track stock accurately, and run daily operations with confidence. Kalmoy POS gives supermarkets, pharmacies, wholesalers, and specialty retailers one reliable system for sales, inventory, customers, and reports.
                 </p>
@@ -261,7 +260,7 @@ $platform_contact_url = 'mailto:' . $platform_email
         <div class="platform-footer-main">
             <div class="platform-footer-brand">
                 <a href="./" class="platform-footer-logo-link">
-                    <img src="<?php echo base_url ?>assets/img/kalmoy_logo.png" alt="Kalmoy POS" class="platform-footer-logo" width="16" height="16" loading="lazy">
+                    <img src="<?php echo base_url ?>assets/img/kalmoy_logo.png" alt="Kalmoy POS logo — Kalmoy Tech Solutions point of sale software" class="platform-footer-logo" width="16" height="16" loading="lazy" decoding="async">
                     <span class="platform-footer-logo-text">Kalmoy POS</span>
                 </a>
                 <p class="platform-footer-tagline">Professional retail management software for modern businesses.</p>

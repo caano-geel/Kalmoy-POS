@@ -5,8 +5,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-  	<title><?php echo $_settings->info('title') != false ? $_settings->info('title').' | ' : '' ?><?php echo $_settings->info('name') ?></title>
-    <link rel="icon" href="<?php echo validate_image($_settings->info('logo')) ?>" />
+    <?php
+    if (!isset($seo_context) || !is_array($seo_context)) {
+        $seo_page = isset($_GET['p']) ? trim((string) $_GET['p']) : 'home';
+        $seo_context = seo_build_context($seo_page, $_GET);
+    }
+    seo_render_head_tags($seo_context);
+    seo_render_json_ld($seo_context);
+    ?>
     <!-- Google Font: Source Sans Pro -->
     <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&amp;display=fallback"> -->
     <!-- Font Awesome -->
