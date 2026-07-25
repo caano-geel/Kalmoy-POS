@@ -37,6 +37,22 @@ class Login extends DBConnection {
 			if(!app_verify_password($password, $user['password'])){
 				return json_encode(array('status'=>'incorrect','msg'=>'Incorrect username or password.'));
 			}
+			$business_id = (int)($user['business_id'] ?? 0);
+			if($business_id <= 0){
+				return json_encode(array('status'=>'incorrect','msg'=>'Account is not linked to a business.'));
+			}
+			$bq = $this->conn->query("SELECT status FROM businesses WHERE id = '{$business_id}' LIMIT 1");
+			if(!$bq || !$bq->num_rows){
+				return json_encode(array('status'=>'incorrect','msg'=>'Business account not found.'));
+			}
+			$bstatus = $bq->fetch_assoc()['status'];
+			if(in_array($bstatus, array('suspended','inactive','cancelled'), true)){
+				return json_encode(array('status'=>'incorrect','msg'=>'This business account is suspended. Contact support.'));
+			}
+			if(isset($_SESSION['platform_user'])){
+				unset($_SESSION['platform_user']);
+			}
+			session_regenerate_id(true);
 			if(strlen($user['password']) === 32 && ctype_xdigit($user['password'])){
 				app_upgrade_password_hash((int)$user['id'], $password);
 			}
@@ -45,6 +61,7 @@ class Login extends DBConnection {
 					$this->settings->set_userdata($k,$v);
 				}
 			}
+			$this->settings->set_userdata('business_id', $business_id);
 			if((int)$user['type'] === 2 && function_exists('admin_decode_user_permissions')){
 				$perms = admin_decode_user_permissions($user['permissions'] ?? '');
 				if($perms !== null){
@@ -52,9 +69,19 @@ class Login extends DBConnection {
 				}
 			}
 			$this->settings->set_userdata('login_type',1);
+			$this->settings->load_system_info();
+			$sub = tenant_subscription_status($business_id);
+			if(!$sub['allowed']){
+				$this->settings->set_userdata('subscription_blocked', 1);
+			} else {
+				unset($_SESSION['userdata']['subscription_blocked']);
+			}
 			$this->conn->query("UPDATE users SET last_login = NOW() WHERE id = '".(int)$user['id']."'");
 			$_SESSION['admin_post_login_redirect'] = 1;
 			admin_activity_log('login', 'Signed in to admin panel', (int)$user['id'], $user['username']);
+			if(!$sub['allowed']){
+				return json_encode(array('status'=>'success','redirect'=>'admin/?page=subscription_expired'));
+			}
 			$redirect = admin_login_landing_path();
 			return json_encode(array(
 				'status' => 'success',

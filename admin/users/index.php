@@ -52,7 +52,7 @@ if($_settings->chk_flashdata('success')): ?>
                     <tbody>
                         <?php
                         $roles = admin_role_definitions();
-                        $qry = $conn->query("SELECT * FROM users ORDER BY date_added DESC, id DESC");
+                        $qry = $conn->query("SELECT * FROM users WHERE 1=1".tenant_sql()." ORDER BY date_added DESC, id DESC");
                         if($qry):
                             while($row = $qry->fetch_assoc()):
                                 $fullname = trim($row['firstname'].' '.$row['lastname']);

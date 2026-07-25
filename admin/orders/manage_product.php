@@ -20,7 +20,7 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
                 <select name="category_id" id="category_id" class="custom-select select2" required>
                 <option value=""></option>
                 <?php
-                    $qry = $conn->query("SELECT * FROM `categories` order by category asc");
+                    $qry = $conn->query("SELECT * FROM `categories` where delete_flag = 0".tenant_sql()." order by category asc");
                     while($row= $qry->fetch_assoc()):
                 ?>
                 <option value="<?php echo $row['id'] ?>" <?php echo isset($category_id) && $category_id == $row['id'] ? 'selected' : '' ?>><?php echo $row['category'] ?></option>

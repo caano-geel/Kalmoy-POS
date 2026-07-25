@@ -56,11 +56,11 @@
 				</div>
 			<div class="form-group">
 				<label for="" class="control-label">About Us</label>
-	             <textarea name="about_us" id="" cols="30" rows="2" class="form-control summernote"><?php echo  is_file(base_app.'about.html') ? file_get_contents(base_app.'about.html') : "" ?></textarea>
+	             <textarea name="about_us" id="" cols="30" rows="2" class="form-control summernote"><?php echo htmlspecialchars((string)($_settings->info('about_us') ?: '')) ?></textarea>
 			</div>
 			<div class="form-group">
 				<label for="" class="control-label">Privacy Policy</label>
-	             <textarea name="privacy_policy" id="" cols="30" rows="2" class="form-control summernote"><?php echo  is_file(base_app.'privacy_policy.html') ? file_get_contents(base_app.'privacy_policy.html') : "" ?></textarea>
+	             <textarea name="privacy_policy" id="" cols="30" rows="2" class="form-control summernote"><?php echo htmlspecialchars((string)($_settings->info('privacy_policy') ?: '')) ?></textarea>
 			</div>
 			
 			<div class="form-group">
@@ -124,7 +124,7 @@
 				<small><i>Choose to upload new banner immages</i></small>
 			</div>
 			<?php 
-            $upload_path = "uploads/banner";
+            $upload_path = function_exists('tenant_upload_dir') ? tenant_upload_dir().'banner' : "uploads/banner";
             if(is_dir(base_app.$upload_path)): 
 			$file= scandir(base_app.$upload_path);
                 foreach($file as $img):

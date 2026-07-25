@@ -17,6 +17,7 @@ if(file_exists(__DIR__ . '/vendor/autoload.php')){
 }
 $db = new DBConnection;
 $conn = $db->conn;
+require_once(__DIR__ . '/inc/tenant.php');
 
 function redirect($url=''){
 	if(!empty($url))
@@ -93,11 +94,11 @@ function admin_user_type(){
  */
 function admin_role_definitions(){
     return array(
-        1 => array('key' => 'admin', 'label' => 'Admin / Owner'),
-        2 => array('key' => 'cashier', 'label' => 'Cashier / Shop Keeper'),
-        // Future roles:
-        // 3 => array('key' => 'manager', 'label' => 'Manager'),
-        // 4 => array('key' => 'inventory', 'label' => 'Inventory Staff'),
+        1 => array('key' => 'owner', 'label' => 'Business Owner'),
+        2 => array('key' => 'cashier', 'label' => 'Cashier'),
+        3 => array('key' => 'manager', 'label' => 'Manager'),
+        4 => array('key' => 'stock_manager', 'label' => 'Stock Manager'),
+        5 => array('key' => 'accountant', 'label' => 'Accountant'),
     );
 }
 /**
@@ -106,10 +107,11 @@ function admin_role_definitions(){
  */
 function admin_role_landing_pages(){
     return array(
-        1 => 'admin/',                  // Admin -> Dashboard
-        2 => 'admin/?page=pos',         // Cashier / Shop Keeper -> POS
-        // 3 => 'admin/?page=sales',    // Manager -> Reports
-        // 4 => 'admin/?page=inventory', // Inventory -> Inventory
+        1 => 'admin/',
+        2 => 'admin/?page=pos',
+        3 => 'admin/',
+        4 => 'admin/?page=inventory',
+        5 => 'admin/?page=analytics',
     );
 }
 function admin_is_cashier(){
@@ -199,11 +201,12 @@ function inventory_low_stock_threshold(){
     return $val < 0 ? 0 : $val;
 }
 function inventory_sold_subquery_sql(){
+    $ts = function_exists('tenant_sql') ? tenant_sql('o') : '';
     return "(
         SELECT ol.inventory_id, SUM(ol.quantity) AS qty
         FROM order_list ol
         INNER JOIN orders o ON o.id = ol.order_id
-        WHERE o.status != 4
+        WHERE o.status != 4{$ts}
         GROUP BY ol.inventory_id
     )";
 }
@@ -260,7 +263,7 @@ function inventory_stock_counts($threshold = null){
         FROM inventory i
         INNER JOIN products p ON p.id = i.product_id
         LEFT JOIN {$sold_sub} sold ON sold.inventory_id = i.id
-        WHERE p.delete_flag = 0 AND p.status = 1";
+        WHERE p.delete_flag = 0 AND p.status = 1".tenant_sql('i');
     $qry = $conn->query($sql);
     if($qry && ($row = $qry->fetch_assoc())){
         return array(
@@ -528,7 +531,7 @@ function dashboard_top_products($limit = 5){
         INNER JOIN orders o ON o.id = ol.order_id
         INNER JOIN inventory i ON i.id = ol.inventory_id
         INNER JOIN products p ON p.id = i.product_id
-        WHERE o.status != 4
+        WHERE o.status != 4".tenant_sql('o')."
         GROUP BY p.id, p.name
         ORDER BY qty_sold DESC
         LIMIT {$limit}";
@@ -558,7 +561,7 @@ function dashboard_recent_sale_lines($limit = 10){
         INNER JOIN inventory i ON i.id = ol.inventory_id
         INNER JOIN products p ON p.id = i.product_id
         INNER JOIN clients c ON c.id = o.client_id
-        WHERE o.status != 4
+        WHERE o.status != 4".tenant_sql('o')."
         ORDER BY o.date_created DESC, ol.id DESC
         LIMIT {$limit}";
     $qry = $conn->query($sql);
@@ -595,7 +598,7 @@ function dashboard_profit_total($date_start, $date_end){
         INNER JOIN orders o ON o.id = s.order_id
         INNER JOIN order_list ol ON ol.order_id = o.id
         INNER JOIN inventory i ON ol.inventory_id = i.id
-        WHERE DATE(s.date_created) BETWEEN '{$date_start}' AND '{$date_end}'";
+        WHERE DATE(s.date_created) BETWEEN '{$date_start}' AND '{$date_end}'".tenant_sql('s');
     $qry = $conn->query($sql);
     if(!$qry) return 0;
     $rows = array();
@@ -635,7 +638,7 @@ function dashboard_payment_sales_today($method){
     $today = date('Y-m-d');
     $method_esc = $conn->real_escape_string($method);
     $qry = $conn->query("SELECT COALESCE(SUM(amount), 0) AS total FROM orders
-        WHERE DATE(date_created) = '{$today}' AND payment_method = '{$method_esc}' AND status != 4");
+        WHERE DATE(date_created) = '{$today}' AND payment_method = '{$method_esc}' AND status != 4".tenant_sql());
     if($qry && ($row = $qry->fetch_assoc())){
         return (float)$row['total'];
     }
@@ -663,7 +666,9 @@ function admin_activity_log($action, $details = '', $user_id = null, $username =
     $username = $conn->real_escape_string(trim((string)$username));
     $details = $conn->real_escape_string(trim((string)$details));
     $now = date('Y-m-d H:i:s');
-    return $conn->query("INSERT INTO admin_activity_log SET user_id = '{$user_id}', username = '{$username}', action = '{$action}', details = '{$details}', date_created = '{$now}'");
+    $bid = tenant_id();
+    if($bid <= 0) return false;
+    return $conn->query("INSERT INTO admin_activity_log SET business_id = '{$bid}', user_id = '{$user_id}', username = '{$username}', action = '{$action}', details = '{$details}', date_created = '{$now}'");
 }
 function admin_activity_action_label($action){
     $map = array(
@@ -710,6 +715,7 @@ function dashboard_recent_activities($limit = 10){
     if(!admin_activity_log_enabled() || !isset($conn) || !$conn) return $items;
     $qry = $conn->query("SELECT user_id, username, action, details, date_created
         FROM admin_activity_log
+        WHERE 1=1".tenant_sql()."
         ORDER BY date_created DESC, id DESC
         LIMIT {$limit}");
     if($qry){
@@ -739,7 +745,7 @@ function dashboard_inventory_value(){
         FROM inventory i
         INNER JOIN products p ON p.id = i.product_id
         LEFT JOIN {$sold_sub} sold ON sold.inventory_id = i.id
-        WHERE p.delete_flag = 0 AND p.status = 1";
+        WHERE p.delete_flag = 0 AND p.status = 1".tenant_sql('i');
     $qry = $conn->query($sql);
     if($qry && ($row = $qry->fetch_assoc())){
         return (float)$row['total'];
@@ -749,7 +755,7 @@ function dashboard_inventory_value(){
 function dashboard_users_count(){
     global $conn;
     if(!isset($conn) || !$conn) return 0;
-    $qry = $conn->query("SELECT COUNT(*) AS total FROM users");
+    $qry = $conn->query("SELECT COUNT(*) AS total FROM users WHERE 1=1".tenant_sql());
     if($qry && ($row = $qry->fetch_assoc())){
         return (int)$row['total'];
     }
@@ -759,7 +765,7 @@ function dashboard_orders_today_count(){
     global $conn;
     if(!isset($conn) || !$conn) return 0;
     $today = date('Y-m-d');
-    $qry = $conn->query("SELECT COUNT(*) AS total FROM orders WHERE DATE(date_created) = '{$today}' AND status != 4");
+    $qry = $conn->query("SELECT COUNT(*) AS total FROM orders WHERE DATE(date_created) = '{$today}' AND status != 4".tenant_sql());
     if($qry && ($row = $qry->fetch_assoc())){
         return (int)$row['total'];
     }
@@ -830,10 +836,10 @@ function admin_load_cashier_permissions(){
     if($cache !== null)
         return $cache;
     $cache = admin_default_cashier_permissions();
-    if(isset($conn) && $conn){
-        $qry = $conn->query("SELECT meta_value FROM system_info WHERE meta_field = 'cashier_permissions' LIMIT 1");
-        if($qry && $qry->num_rows > 0){
-            $decoded = json_decode($qry->fetch_assoc()['meta_value'], true);
+    if(isset($conn) && $conn && tenant_id() > 0){
+        $raw = tenant_setting_get('cashier_permissions', '');
+        if($raw !== ''){
+            $decoded = json_decode($raw, true);
             if(is_array($decoded)){
                 foreach($cache as $key => $val){
                     if(array_key_exists($key, $decoded))
@@ -919,12 +925,7 @@ function admin_save_cashier_permissions($data){
     }
     $save['permissions'] = 0;
     $save['dashboard_full'] = 0;
-    $json = $conn->real_escape_string(json_encode($save));
-    $check = $conn->query("SELECT meta_field FROM system_info WHERE meta_field = 'cashier_permissions' LIMIT 1");
-    if($check && $check->num_rows > 0){
-        return $conn->query("UPDATE system_info SET meta_value = '{$json}' WHERE meta_field = 'cashier_permissions'");
-    }
-    return $conn->query("INSERT INTO system_info SET meta_field = 'cashier_permissions', meta_value = '{$json}'");
+    return tenant_setting_set('cashier_permissions', json_encode($save));
 }
 function admin_cashier_has_permission($key){
     if(!admin_is_cashier())
@@ -969,6 +970,7 @@ function admin_cashier_page_permission($page){
         'backup' => 'backup_restore',
         'users' => 'users_manage',
         'users/manage_user' => 'users_manage',
+        'subscription_expired' => 'my_account',
         'notifications' => 'dashboard_limited',
         'maintenance/brand' => 'brands',
         'maintenance/manage_brand' => 'brands',
@@ -986,6 +988,8 @@ function admin_cashier_page_permission($page){
 }
 function admin_cashier_allowed_page($page){
     if(!admin_is_cashier())
+        return true;
+    if($page === 'subscription_expired')
         return true;
     $perm = admin_cashier_page_permission($page);
     if($perm === null)
@@ -1197,10 +1201,10 @@ function business_first_transaction_date(){
     global $conn;
     if(!isset($conn) || !$conn) return date('Y-m-d');
     $dates = array();
-    $q = $conn->query("SELECT MIN(DATE(date_created)) AS d FROM sales");
+    $q = $conn->query("SELECT MIN(DATE(date_created)) AS d FROM sales WHERE 1=1".tenant_sql());
     if($q && ($r = $q->fetch_assoc()) && !empty($r['d'])) $dates[] = $r['d'];
     if(function_exists('expenses_table_enabled') && expenses_table_enabled()){
-        $q2 = $conn->query("SELECT MIN(DATE(expense_date)) AS d FROM expenses WHERE delete_flag = 0");
+        $q2 = $conn->query("SELECT MIN(DATE(expense_date)) AS d FROM expenses WHERE delete_flag = 0".tenant_sql());
         if($q2 && ($r2 = $q2->fetch_assoc()) && !empty($r2['d'])) $dates[] = $r2['d'];
     }
     if(empty($dates)) return date('Y-m-d');
@@ -1301,7 +1305,7 @@ function business_orders_count($date_start, $date_end){
     $date_start = date('Y-m-d', strtotime($date_start));
     $date_end = date('Y-m-d', strtotime($date_end));
     $q = $conn->query("SELECT COUNT(DISTINCT s.order_id) AS total FROM sales s
-        WHERE DATE(s.date_created) BETWEEN '{$date_start}' AND '{$date_end}'");
+        WHERE DATE(s.date_created) BETWEEN '{$date_start}' AND '{$date_end}'".tenant_sql('s'));
     if($q && ($row = $q->fetch_assoc())) return (int)$row['total'];
     return 0;
 }
@@ -1317,7 +1321,7 @@ function business_lifetime_summary(){
     global $conn;
     $total_customers = 0;
     if(isset($conn) && $conn){
-        $cq = $conn->query("SELECT COUNT(*) AS total FROM clients WHERE delete_flag = 0");
+        $cq = $conn->query("SELECT COUNT(*) AS total FROM clients WHERE delete_flag = 0".tenant_sql());
         if($cq && ($cr = $cq->fetch_assoc())) $total_customers = (int)$cr['total'];
     }
     return array(
@@ -1399,7 +1403,7 @@ function expenses_normalize_range($date_start, $date_end){
 function expenses_where_sql($date_start, $date_end, $category = ''){
     global $conn;
     $range = expenses_normalize_range($date_start, $date_end);
-    $where = "delete_flag = 0 AND DATE(expense_date) BETWEEN '{$range['start']}' AND '{$range['end']}'";
+    $where = "delete_flag = 0 AND DATE(expense_date) BETWEEN '{$range['start']}' AND '{$range['end']}'".tenant_sql();
     $category = trim((string)$category);
     if($category !== ''){
         $cat = $conn->real_escape_string($category);
@@ -1481,7 +1485,7 @@ function profit_analytics_sales_total($date_start, $date_end){
     $date_start = date('Y-m-d', strtotime($date_start));
     $date_end = date('Y-m-d', strtotime($date_end));
     $qry = $conn->query("SELECT COALESCE(SUM(s.total_amount), 0) AS total FROM sales s
-        WHERE DATE(s.date_created) BETWEEN '{$date_start}' AND '{$date_end}'");
+        WHERE DATE(s.date_created) BETWEEN '{$date_start}' AND '{$date_end}'".tenant_sql('s'));
     if($qry && ($row = $qry->fetch_assoc())) return (float)$row['total'];
     return 0;
 }
@@ -1593,6 +1597,8 @@ function notification_type_allowed($type){
 function admin_notify($type, $title, $message, $link = '', $ref_key = ''){
     global $conn;
     if(!notifications_table_enabled() || !isset($conn) || !$conn) return false;
+    $bid = tenant_id();
+    if($bid <= 0) return false;
     $type = notification_type_allowed($type);
     $title = $conn->real_escape_string(trim((string)$title));
     $message = $conn->real_escape_string(trim((string)$message));
@@ -1600,18 +1606,18 @@ function admin_notify($type, $title, $message, $link = '', $ref_key = ''){
     $ref_key = $conn->real_escape_string(trim((string)$ref_key));
     if($ref_key !== ''){
         $since = date('Y-m-d H:i:s', strtotime('-24 hours'));
-        $dup = $conn->query("SELECT id FROM notifications WHERE ref_key = '{$ref_key}' AND date_created >= '{$since}' LIMIT 1");
+        $dup = $conn->query("SELECT id FROM notifications WHERE business_id = '{$bid}' AND ref_key = '{$ref_key}' AND date_created >= '{$since}' LIMIT 1");
         if($dup && $dup->num_rows > 0) return false;
     }
     $ref_sql = $ref_key !== '' ? "'{$ref_key}'" : 'NULL';
     $link_sql = $link !== '' ? "'{$link}'" : 'NULL';
     $now = date('Y-m-d H:i:s');
-    return $conn->query("INSERT INTO notifications SET user_id = NULL, type = '{$type}', title = '{$title}', message = '{$message}', link = {$link_sql}, ref_key = {$ref_sql}, date_created = '{$now}'");
+    return $conn->query("INSERT INTO notifications SET business_id = '{$bid}', user_id = NULL, type = '{$type}', title = '{$title}', message = '{$message}', link = {$link_sql}, ref_key = {$ref_sql}, date_created = '{$now}'");
 }
 function notifications_unread_count(){
     global $conn;
     if(!notifications_table_enabled() || !isset($conn) || !$conn) return 0;
-    $qry = $conn->query("SELECT COUNT(*) AS total FROM notifications WHERE is_read = 0");
+    $qry = $conn->query("SELECT COUNT(*) AS total FROM notifications WHERE is_read = 0".tenant_sql());
     if($qry && ($row = $qry->fetch_assoc())) return (int)$row['total'];
     return 0;
 }
@@ -1620,7 +1626,8 @@ function notifications_list($limit = 10, $unread_only = false){
     $items = array();
     if(!notifications_table_enabled() || !isset($conn) || !$conn) return $items;
     $limit = max(1, (int)$limit);
-    $where = $unread_only ? 'WHERE is_read = 0' : '';
+    $where = 'WHERE 1=1'.tenant_sql();
+    if($unread_only) $where .= ' AND is_read = 0';
     $qry = $conn->query("SELECT * FROM notifications {$where} ORDER BY date_created DESC, id DESC LIMIT {$limit}");
     if($qry){
         while($row = $qry->fetch_assoc()){
@@ -1682,12 +1689,12 @@ function notifications_sync_system(){
         $qry = $conn->query("SELECT COUNT(*) AS total FROM inventory i
             INNER JOIN products p ON p.id = i.product_id
             WHERE p.delete_flag = 0 AND i.expiry_date IS NOT NULL
-            AND i.expiry_date BETWEEN '{$today}' AND '{$soon}'");
+            AND i.expiry_date BETWEEN '{$today}' AND '{$soon}'".tenant_sql('i'));
         if($qry && ($row = $qry->fetch_assoc()) && (int)$row['total'] > 0){
             admin_notify('warning', 'Expiry Alert', format_num($row['total']).' stock item(s) expire within 30 days.', base_url.'admin/?page=inventory', 'expiry_'.$row['total']);
         }
     }
-    $pending = (int)$conn->query("SELECT COUNT(*) AS total FROM orders WHERE status = '0'")->fetch_assoc()['total'];
+    $pending = (int)$conn->query("SELECT COUNT(*) AS total FROM orders WHERE status = '0'".tenant_sql())->fetch_assoc()['total'];
     if($pending > 0){
         admin_notify('info', 'Open Orders', format_num($pending).' order(s) are awaiting fulfillment.', base_url.'admin/?page=orders&status=0', 'pending_orders_'.$pending);
     }
@@ -1725,7 +1732,7 @@ app_ensure_upload_dirs();
 function backup_last_info(){
     global $conn;
     if(!backup_logs_table_enabled() || !isset($conn) || !$conn) return null;
-    $qry = $conn->query("SELECT * FROM backup_logs WHERE status = 'success' ORDER BY date_created DESC, id DESC LIMIT 1");
+    $qry = $conn->query("SELECT * FROM backup_logs WHERE status = 'success'".tenant_sql()." ORDER BY date_created DESC, id DESC LIMIT 1");
     if($qry && $qry->num_rows > 0) return $qry->fetch_assoc();
     return null;
 }

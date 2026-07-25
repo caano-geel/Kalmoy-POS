@@ -50,3 +50,6 @@ database/generate_dummy_data.php
 
 # Optional local scratch / old credential copies
 backup_production_config/
+
+# Local login credentials
+Login Credentials/

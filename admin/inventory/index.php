@@ -80,7 +80,7 @@ $inventory_stock_col = admin_can_view_profit() ? 3 : 2;
 						INNER JOIN products p ON p.id = i.product_id
 						INNER JOIN brands b ON p.brand_id = b.id
 						LEFT JOIN {$sold_sub} sold ON sold.inventory_id = i.id
-						WHERE p.delete_flag = 0 AND p.status = 1
+						WHERE p.delete_flag = 0 AND p.status = 1".tenant_sql('i')."
 						{$having_sql}
 						ORDER BY avail ASC, unix_timestamp(i.date_created) DESC";
 					$qry = $conn->query($inventory_sql);

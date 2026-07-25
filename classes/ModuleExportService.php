@@ -58,7 +58,7 @@ class ModuleExportService {
             FROM products p
             LEFT JOIN brands b ON b.id = p.brand_id
             LEFT JOIN categories c ON c.id = p.category_id
-            WHERE p.delete_flag = 0
+            WHERE p.delete_flag = 0".tenant_sql('p')."
             ORDER BY p.name ASC";
         $q = $this->conn->query($sql);
         while($q && ($r = $q->fetch_assoc())){
@@ -94,7 +94,7 @@ class ModuleExportService {
             LEFT JOIN brands b ON b.id = p.brand_id
             LEFT JOIN categories c ON c.id = p.category_id
             LEFT JOIN {$sold} sold ON sold.inventory_id = i.id
-            WHERE p.delete_flag = 0
+            WHERE p.delete_flag = 0".tenant_sql('i')."
             ORDER BY p.name ASC, i.variant ASC";
         $q = $this->conn->query($sql);
         while($q && ($r = $q->fetch_assoc())){
@@ -178,7 +178,7 @@ class ModuleExportService {
         $counts = function_exists('ash_brand_product_counts') ? ash_brand_product_counts() : array();
         $headers = array('Brand', 'Products', 'Status', 'Description');
         $rows = array();
-        $q = $this->conn->query("SELECT * FROM brands WHERE delete_flag = 0 ORDER BY name ASC");
+        $q = $this->conn->query("SELECT * FROM brands WHERE delete_flag = 0".tenant_sql()." ORDER BY name ASC");
         while($q && ($r = $q->fetch_assoc())){
             $rows[] = array(
                 stripslashes($r['name']),
@@ -194,7 +194,7 @@ class ModuleExportService {
         $counts = function_exists('ash_category_product_counts') ? ash_category_product_counts() : array();
         $headers = array('Category', 'Products', 'Status', 'Description');
         $rows = array();
-        $q = $this->conn->query("SELECT * FROM categories WHERE delete_flag = 0 ORDER BY category ASC");
+        $q = $this->conn->query("SELECT * FROM categories WHERE delete_flag = 0".tenant_sql()." ORDER BY category ASC");
         while($q && ($r = $q->fetch_assoc())){
             $rows[] = array(
                 stripslashes($r['category']),

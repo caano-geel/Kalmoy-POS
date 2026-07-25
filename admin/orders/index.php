@@ -61,7 +61,7 @@ function ash_order_status_badge($status){
 				</thead>
 				<tbody>
 					<?php 
-						$qry = $conn->query("SELECT o.*,concat(c.firstname,' ',c.lastname) as client from `orders` o inner join clients c on c.id = o.client_id {$order_status_sql} order by unix_timestamp(o.date_created) desc ");
+						$qry = $conn->query("SELECT o.*,concat(c.firstname,' ',c.lastname) as client from `orders` o inner join clients c on c.id = o.client_id {$order_status_sql}".tenant_sql('o')." order by unix_timestamp(o.date_created) desc ");
 						while($row = $qry->fetch_assoc()):
 					?>
 						<tr>

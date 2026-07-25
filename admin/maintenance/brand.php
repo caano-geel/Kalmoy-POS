@@ -30,7 +30,7 @@ if($_settings->chk_flashdata('success')): ?>
 				</thead>
 				<tbody>
 					<?php 
-						$qry = $conn->query("SELECT * from `brands` where delete_flag = 0 order by `name` asc ");
+						$qry = $conn->query("SELECT * from `brands` where delete_flag = 0".tenant_sql()." order by `name` asc ");
 						while($row = $qry->fetch_assoc()):
                             $row['description'] = strip_tags(stripslashes(html_entity_decode($row['description'])));
                             $prod_cnt = isset($brand_counts[(int)$row['id']]) ? $brand_counts[(int)$row['id']] : 0;

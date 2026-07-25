@@ -57,6 +57,19 @@ if(isset($_SESSION['userdata']) && users_table_has_status()){
         exit;
     }
 }
+if(isset($_SESSION['userdata']) && tenant_id() <= 0 && strpos($link, 'login.php') === false){
+    unset($_SESSION['userdata']);
+    redirect('admin/login.php');
+    exit;
+}
+$allow_subscription_page = (isset($_GET['page']) && $_GET['page'] === 'subscription_expired');
+if(isset($_SESSION['userdata']) && strpos($link, 'login.php') === false){
+    $sub = tenant_subscription_status();
+    if(!$sub['allowed'] && !$allow_subscription_page){
+        redirect('admin/?page=subscription_expired');
+        exit;
+    }
+}
 if(isset($_SESSION['userdata']) && admin_is_cashier()){
 	$on_login = strpos($link, 'login.php') !== false;
 	$on_index = strpos($link, 'index.php') !== false || preg_match('#/admin/?(\?.*)?$#', parse_url($link, PHP_URL_PATH) ?: '');

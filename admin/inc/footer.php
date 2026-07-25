@@ -63,7 +63,7 @@
         </strong>
         All rights reserved.
         <div class="float-right d-none d-sm-inline-block">
-          <b><?php echo htmlspecialchars($_settings->info('name') ?: 'Kalmoy POS') ?> (by: <a href="mailto:abdullahiomarsalad@gmail.com" target="blank">Abdullahi Omar Salad</a> )</b> v1.0
+          <b><?php echo htmlspecialchars($_settings->info('name') ?: 'Kalmoy POS') ?> (by: <a href="mailto:kalmoypos@gmail.com" target="blank">Abdullahi Omar Salad</a> )</b> v1.0
         </div>
       </footer>
     </div>

@@ -29,7 +29,7 @@ if($_settings->chk_flashdata('success')): ?>
 				</thead>
 				<tbody>
 					<?php 
-						$qry = $conn->query("SELECT *,concat(firstname,' ',lastname) as fullname from `clients` where delete_flag = 0 order by concat(firstname,' ',lastname) asc ");
+						$qry = $conn->query("SELECT *,concat(firstname,' ',lastname) as fullname from `clients` where delete_flag = 0".tenant_sql()." order by concat(firstname,' ',lastname) asc ");
 						while($row = $qry->fetch_assoc()):
 					?>
 						<tr>

@@ -1,10 +1,13 @@
 <?php
 if(isset($_GET['id']) && $_GET['id'] > 0){
-    $qry = $conn->query("SELECT * from `inventory` where id = '{$_GET['id']}' ");
+    $qry = $conn->query("SELECT * from `inventory` where id = '{$_GET['id']}' ".tenant_sql());
     if($qry->num_rows > 0){
         foreach($qry->fetch_assoc() as $k => $v){
             $$k=$v;
         }
+    }else{
+        echo '<script>alert_toast("Inventory record not found.", "error"); location.replace("./?page=inventory");</script>';
+        return;
     }
 }
 ?>
@@ -20,7 +23,7 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
                 <select name="product_id" id="product_id" class="custom-select select2" required>
                     <option value=""></option>
                     <?php
-                        $qry = $conn->query("SELECT * FROM `products` where delete_flag = 0 ".(isset($product_id) ? " or id = '{$product_id}'" : "")." order by `name` asc");
+                        $qry = $conn->query("SELECT * FROM `products` where delete_flag = 0".tenant_sql()." order by `name` asc");
                         while($row= $qry->fetch_assoc()):
                             foreach($row as $k=> $v){
 								$row[$k] = trim(stripslashes($v));

@@ -462,33 +462,41 @@ class InventoryImport {
         return $this->conn->real_escape_string($v);
     }
 
+    private function tenantBid(){
+        return function_exists('tenant_id') ? (int)tenant_id() : 0;
+    }
+
+    private function tenantScope($alias = ''){
+        return function_exists('tenant_sql') ? tenant_sql($alias) : '';
+    }
+
     private function findBrand($name){
         $name = trim($name);
         if($name === '') return null;
-        $q = $this->conn->query("SELECT id, name FROM brands WHERE delete_flag = 0 AND LOWER(name) = LOWER('".$this->esc($name)."') LIMIT 1");
+        $q = $this->conn->query("SELECT id, name FROM brands WHERE delete_flag = 0 AND LOWER(name) = LOWER('".$this->esc($name)."')".$this->tenantScope()." LIMIT 1");
         return ($q && $q->num_rows) ? $q->fetch_assoc() : null;
     }
 
     private function findCategory($name){
         $name = trim($name);
         if($name === '') return null;
-        $q = $this->conn->query("SELECT id, category FROM categories WHERE delete_flag = 0 AND LOWER(category) = LOWER('".$this->esc($name)."') LIMIT 1");
+        $q = $this->conn->query("SELECT id, category FROM categories WHERE delete_flag = 0 AND LOWER(category) = LOWER('".$this->esc($name)."')".$this->tenantScope()." LIMIT 1");
         return ($q && $q->num_rows) ? $q->fetch_assoc() : null;
     }
 
     private function findProductByBarcode($barcode){
         if($barcode === '') return null;
-        $q = $this->conn->query("SELECT * FROM products WHERE delete_flag = 0 AND barcode = '".$this->esc($barcode)."' LIMIT 1");
+        $q = $this->conn->query("SELECT * FROM products WHERE delete_flag = 0 AND barcode = '".$this->esc($barcode)."'".$this->tenantScope()." LIMIT 1");
         return ($q && $q->num_rows) ? $q->fetch_assoc() : null;
     }
 
 	private function findProductByName($name){
-		$q = $this->conn->query("SELECT * FROM products WHERE delete_flag = 0 AND LOWER(name) = LOWER('".$this->esc($name)."') LIMIT 1");
+		$q = $this->conn->query("SELECT * FROM products WHERE delete_flag = 0 AND LOWER(name) = LOWER('".$this->esc($name)."')".$this->tenantScope()." LIMIT 1");
 		return ($q && $q->num_rows) ? $q->fetch_assoc() : null;
 	}
 
     private function findInventory($product_id, $variant){
-        $q = $this->conn->query("SELECT * FROM inventory WHERE product_id = '".(int)$product_id."' AND variant = '".$this->esc($variant)."' LIMIT 1");
+        $q = $this->conn->query("SELECT * FROM inventory WHERE product_id = '".(int)$product_id."' AND variant = '".$this->esc($variant)."'".$this->tenantScope()." LIMIT 1");
         return ($q && $q->num_rows) ? $q->fetch_assoc() : null;
     }
 
@@ -653,7 +661,7 @@ class InventoryImport {
         $existing = $this->findBrand($name);
         if($existing) return (int)$existing['id'];
         $name = trim($name);
-        $sql = "INSERT INTO brands SET name = '".$this->esc($name)."', status = 1";
+        $sql = "INSERT INTO brands SET business_id = '".$this->tenantBid()."', name = '".$this->esc($name)."', description = '', status = 1";
         if(!$this->conn->query($sql)){
             throw new Exception('Could not create brand: '.$name);
         }
@@ -664,7 +672,7 @@ class InventoryImport {
         $existing = $this->findCategory($name);
         if($existing) return (int)$existing['id'];
         $name = trim($name);
-        $sql = "INSERT INTO categories SET category = '".$this->esc($name)."', status = 1";
+        $sql = "INSERT INTO categories SET business_id = '".$this->tenantBid()."', category = '".$this->esc($name)."', description = '', status = 1";
         if(!$this->conn->query($sql)){
             throw new Exception('Could not create category: '.$name);
         }
@@ -687,6 +695,7 @@ class InventoryImport {
         if($row['product_action'] === 'create'){
             $specs = htmlentities('<p>Imported via inventory Excel import.</p>');
             $sql = "INSERT INTO products SET
+                business_id = '".$this->tenantBid()."',
                 brand_id = '".(int)$brand_id."',
                 category_id = '".(int)$category_id."',
                 name = '".$this->esc($parsed['product_name'])."',
@@ -707,7 +716,7 @@ class InventoryImport {
                 $sets[] = "barcode = ".$barcodeSql;
             }
             if(!empty($sets)){
-                $sql = "UPDATE products SET ".implode(', ', $sets)." WHERE id = '".(int)$product_id."'";
+                $sql = "UPDATE products SET ".implode(', ', $sets)." WHERE id = '".(int)$product_id."'".$this->tenantScope();
                 if(!$this->conn->query($sql)){
                     throw new Exception('Failed to update product: '.$parsed['product_name']);
                 }
@@ -724,6 +733,7 @@ class InventoryImport {
         if($row['inventory_action'] === 'create'){
             $costSql = $this->can_set_cost ? "'".(float)$row['cost']."'" : "'0'";
             $sql = "INSERT INTO inventory SET
+                business_id = '".$this->tenantBid()."',
                 product_id = '".(int)$product_id."',
                 variant = '".$this->esc($parsed['variant'])."',
                 quantity = '".(float)$storedQty."',
@@ -750,7 +760,7 @@ class InventoryImport {
             if($invId <= 0){
                 throw new Exception('Inventory row not found for: '.$parsed['product_name']);
             }
-            $sql = "UPDATE inventory SET ".implode(', ', $sets)." WHERE id = '".(int)$invId."'";
+            $sql = "UPDATE inventory SET ".implode(', ', $sets)." WHERE id = '".(int)$invId."'".$this->tenantScope();
             if(!$this->conn->query($sql)){
                 throw new Exception('Failed to update inventory for: '.$parsed['product_name']);
             }

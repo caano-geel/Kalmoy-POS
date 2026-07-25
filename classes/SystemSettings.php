@@ -11,27 +11,70 @@ class SystemSettings extends DBConnection{
 		return($this->conn);
 	}
 	function load_system_info(){
-		// if(!isset($_SESSION['system_info'])){
-			$sql = "SELECT * FROM system_info";
-			$qry = $this->conn->query($sql);
-				while($row = $qry->fetch_assoc()){
-					$_SESSION['system_info'][$row['meta_field']] = $row['meta_value'];
+		$_SESSION['system_info'] = array();
+		$bid = function_exists('tenant_id') ? tenant_id() : 0;
+		if($bid <= 0){
+			$_SESSION['system_info'] = array(
+				'name' => 'Kalmoy POS',
+				'short_name' => 'Kalmoy POS',
+				'currency_symbol' => 'Ksh',
+			);
+			return;
+		}
+		$sql = "SELECT * FROM business_settings WHERE business_id = '{$bid}'";
+		$qry = $this->conn->query($sql);
+		if($qry){
+			while($row = $qry->fetch_assoc()){
+				$_SESSION['system_info'][$row['meta_field']] = $row['meta_value'];
+			}
+		}
+		if(empty($_SESSION['system_info']) && function_exists('tenant_seed_default_settings')){
+			$bq = $this->conn->query("SELECT name FROM businesses WHERE id = '{$bid}' LIMIT 1");
+			if($bq && $bq->num_rows > 0){
+				$bname = $bq->fetch_assoc()['name'];
+				tenant_seed_default_settings($bid, $bname, $this->conn);
+				$qry2 = $this->conn->query($sql);
+				if($qry2){
+					while($row = $qry2->fetch_assoc()){
+						$_SESSION['system_info'][$row['meta_field']] = $row['meta_value'];
+					}
 				}
-		// }
+			}
+		}
+		if(function_exists('tenant_ensure_tenant_resources')){
+			$repaired = tenant_ensure_tenant_resources($bid, $this->conn);
+			if($repaired){
+				$_SESSION['system_info'] = array();
+				$qry3 = $this->conn->query($sql);
+				if($qry3){
+					while($row = $qry3->fetch_assoc()){
+						$_SESSION['system_info'][$row['meta_field']] = $row['meta_value'];
+					}
+				}
+			}
+		}
 	}
 	function update_system_info(){
-		$sql = "SELECT * FROM system_info";
+		$bid = function_exists('tenant_id') ? tenant_id() : 0;
+		if($bid <= 0) return false;
+		$sql = "SELECT * FROM business_settings WHERE business_id = '{$bid}'";
 		$qry = $this->conn->query($sql);
+		if($qry){
 			while($row = $qry->fetch_assoc()){
 				if(isset($_SESSION['system_info'][$row['meta_field']]))unset($_SESSION['system_info'][$row['meta_field']]);
 				$_SESSION['system_info'][$row['meta_field']] = $row['meta_value'];
 			}
+		}
 		return true;
 	}
 	function update_settings_info(){
-		$data = "";
+		$bid = function_exists('tenant_id') ? tenant_id() : 0;
+		if($bid <= 0){
+			return json_encode(array('status'=>'failed','msg'=>'No business context.'));
+		}
+		$uploadBase = function_exists('tenant_ensure_upload_dir') ? tenant_ensure_upload_dir($bid) : base_app.'uploads/';
+		$uploadPrefix = function_exists('tenant_upload_dir') ? tenant_upload_dir($bid) : 'uploads/';
 		foreach ($_POST as $key => $value) {
-			if(!in_array($key,array("about_us","privacy_policy")))
 			if($key === 'low_stock_threshold'){
 				$value = max(0, (int)$value);
 			}
@@ -42,22 +85,17 @@ class SystemSettings extends DBConnection{
 					if($value === '') continue;
 				}
 			}
+			$value = $this->conn->real_escape_string(str_replace("'", "&apos;", $value));
 			if(isset($_SESSION['system_info'][$key])){
-				$value = str_replace("'", "&apos;", $value);
-				$qry = $this->conn->query("UPDATE system_info set meta_value = '{$value}' where meta_field = '{$key}' ");
+				$qry = $this->conn->query("UPDATE business_settings set meta_value = '{$value}' where business_id = '{$bid}' AND meta_field = '{$key}' ");
 			}else{
-				$qry = $this->conn->query("INSERT into system_info set meta_value = '{$value}', meta_field = '{$key}' ");
+				$keyEsc = $this->conn->real_escape_string($key);
+				$qry = $this->conn->query("INSERT into business_settings set business_id = '{$bid}', meta_value = '{$value}', meta_field = '{$keyEsc}' ");
 			}
-		}
-		if(isset($_POST['about_us'])){
-			file_put_contents('../about.html',$_POST['about_us']);
-		}
-		if(isset($_POST['privacy_policy'])){
-			file_put_contents('../privacy_policy.html',$_POST['privacy_policy']);
 		}
 		if(!empty($_FILES['img']['tmp_name'])){
 			$ext = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
-			$fname = "uploads/logo-".(time()).".$ext";
+			$fname = $uploadPrefix."logo-".(time()).".$ext";
 			$accept = array('image/jpeg','image/png');
 			if(!in_array($_FILES['img']['type'],$accept)){
 				$err = "Image file type is invalid";
@@ -80,17 +118,17 @@ class SystemSettings extends DBConnection{
 			$upload = false;
 			if($upload){
 				if(isset($_SESSION['system_info']['logo'])){
-					$qry = $this->conn->query("UPDATE system_info set meta_value = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where meta_field = 'logo' ");
+					$qry = $this->conn->query("UPDATE business_settings set meta_value = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where business_id = '{$bid}' AND meta_field = 'logo' ");
 					if(is_file(base_app.$_SESSION['system_info']['logo'])) unlink(base_app.$_SESSION['system_info']['logo']);
 				}else{
-					$qry = $this->conn->query("INSERT into system_info set meta_value = '{$fname}',meta_field = 'logo' ");
+					$qry = $this->conn->query("INSERT into business_settings set business_id = '{$bid}', meta_value = '{$fname}',meta_field = 'logo' ");
 				}
 			}
 			imagedestroy($temp);
 		}
 		if(!empty($_FILES['cover']['tmp_name'])){
 			$ext = pathinfo($_FILES['cover']['name'], PATHINFO_EXTENSION);
-			$fname = "uploads/cover-".(time()).".$ext";
+			$fname = $uploadPrefix."cover-".(time()).".$ext";
 			$accept = array('image/jpeg','image/png');
 			if(!in_array($_FILES['cover']['type'],$accept)){
 				$err = "Image file type is invalid";
@@ -114,10 +152,10 @@ class SystemSettings extends DBConnection{
 			$upload = false;
 			if($upload){
 				if(isset($_SESSION['system_info']['cover'])){
-					$qry = $this->conn->query("UPDATE system_info set meta_value = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where meta_field = 'cover' ");
+					$qry = $this->conn->query("UPDATE business_settings set meta_value = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where business_id = '{$bid}' AND meta_field = 'cover' ");
 					if(is_file(base_app.$_SESSION['system_info']['cover'])) unlink(base_app.$_SESSION['system_info']['cover']);
 				}else{
-					$qry = $this->conn->query("INSERT into system_info set meta_value = '{$fname}',meta_field = 'cover' ");
+					$qry = $this->conn->query("INSERT into business_settings set business_id = '{$bid}', meta_value = '{$fname}',meta_field = 'cover' ");
 				}
 			}
 			imagedestroy($temp);
@@ -132,9 +170,9 @@ class SystemSettings extends DBConnection{
 			if($_FILES['scanner_sound']['size'] > $max_size){
 				return json_encode(array('status'=>'failed','msg'=>'Scanner sound must be 1MB or smaller.'));
 			}
-			$fname = 'uploads/scanner-sound.'.$ext;
+			$fname = $uploadPrefix.'scanner-sound.'.$ext;
 			foreach(array('mp3','wav','ogg') as $oldext){
-				$old = 'uploads/scanner-sound.'.$oldext;
+				$old = $uploadPrefix.'scanner-sound.'.$oldext;
 				if(is_file(base_app.$old))
 					unlink(base_app.$old);
 			}
@@ -143,14 +181,16 @@ class SystemSettings extends DBConnection{
 			}
 			$value = $fname;
 			if(isset($_SESSION['system_info']['scanner_sound_file'])){
-				$qry = $this->conn->query("UPDATE system_info set meta_value = '{$value}' where meta_field = 'scanner_sound_file' ");
+				$qry = $this->conn->query("UPDATE business_settings set meta_value = '{$value}' where business_id = '{$bid}' AND meta_field = 'scanner_sound_file' ");
 			}else{
-				$qry = $this->conn->query("INSERT into system_info set meta_value = '{$value}', meta_field = 'scanner_sound_file' ");
+				$qry = $this->conn->query("INSERT into business_settings set business_id = '{$bid}', meta_value = '{$value}', meta_field = 'scanner_sound_file' ");
 			}
 		}
 		if(isset($_FILES['banners']) && count($_FILES['banners']['tmp_name']) > 0){
 			$err='';
-			$banner_path = "uploads/banner/";
+			$banner_path = $uploadPrefix."banner/";
+			if(!is_dir(base_app.$banner_path))
+				mkdir(base_app.$banner_path, 0755, true);
 			foreach($_FILES['banners']['tmp_name'] as $k => $v){
 				if(!empty($_FILES['banners']['tmp_name'][$k])){
 					$accept = array('image/jpeg','image/png');

@@ -9,7 +9,7 @@ $backup_count = 0;
 $backup_storage = 0;
 $last_backup_date = '&mdash;';
 if(backup_logs_table_enabled()){
-    $stats_row = $conn->query("SELECT COUNT(*) AS total, COALESCE(SUM(file_size), 0) AS storage FROM backup_logs")->fetch_assoc();
+    $stats_row = $conn->query("SELECT COUNT(*) AS total, COALESCE(SUM(file_size), 0) AS storage FROM backup_logs WHERE 1=1".tenant_sql())->fetch_assoc();
     $backup_count = (int)($stats_row['total'] ?? 0);
     $backup_storage = (float)($stats_row['storage'] ?? 0);
     $last_backup = backup_last_info();
@@ -53,8 +53,8 @@ echo module_page_styles();
     </div>
 
     <div class="mod-warning-card">
-        <div class="mod-warning-title"><i class="fas fa-exclamation-triangle mr-1"></i> Restore Caution</div>
-        <p>Restoring a backup will <strong>overwrite all current business data</strong> in the database. This action cannot be undone. Download a current backup before restoring an older archive. Only administrators may restore backups.</p>
+        <div class="mod-warning-title"><i class="fas fa-exclamation-triangle mr-1"></i> Multi-Tenant Backup</div>
+        <p>Backups include <strong>only your business data</strong>. Restore and bulk clean actions are disabled in SaaS mode to protect other tenants. Contact Kalmoy Tech Solutions if you need a restore.</p>
     </div>
 
     <div class="mod-section">
@@ -80,7 +80,7 @@ echo module_page_styles();
                     <tbody>
                         <?php
                         $i = 1;
-                        $qry = $conn->query("SELECT * FROM backup_logs ORDER BY date_created DESC, id DESC");
+                        $qry = $conn->query("SELECT * FROM backup_logs WHERE 1=1".tenant_sql()." ORDER BY date_created DESC, id DESC");
                         if($qry):
                             while($row = $qry->fetch_assoc()):
                         ?>
@@ -104,8 +104,6 @@ echo module_page_styles();
                                 <div class="ash-table-actions">
                                 <a href="<?php echo base_url ?>classes/Master.php?f=download_backup&id=<?php echo (int)$row['id'] ?>"
                                    class="btn btn-outline-primary mod-action-btn mr-1" title="Download"><i class="fas fa-download"></i></a>
-                                <button type="button" class="btn btn-outline-warning mod-action-btn restore-backup mr-1"
-                                    data-id="<?php echo (int)$row['id'] ?>" data-name="<?php echo htmlspecialchars($row['filename']) ?>" title="Restore"><i class="fas fa-undo"></i></button>
                                 <button type="button" class="btn btn-outline-danger mod-action-btn delete-backup"
                                     data-id="<?php echo (int)$row['id'] ?>" title="Delete"><i class="fas fa-trash"></i></button>
                                 </div>
@@ -121,7 +119,7 @@ echo module_page_styles();
         </div>
     </div>
 
-    <?php if(backup_logs_table_enabled() && admin_is_owner()): ?>
+    <?php if(false && backup_logs_table_enabled() && admin_is_owner()): ?>
     <div class="mod-section">
         <div class="mod-section-header mod-sh-backup"><i class="fas fa-broom"></i> Clean Data</div>
         <div class="mod-section-body">

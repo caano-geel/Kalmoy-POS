@@ -183,8 +183,8 @@ function ash_brand_product_counts(){
     static $cache = null;
     if($cache !== null) return $cache;
     $cache = array();
-    if(isset($conn) && $conn){
-        $qry = $conn->query("SELECT brand_id, COUNT(*) AS cnt FROM products WHERE delete_flag = 0 GROUP BY brand_id");
+    if(isset($conn) && $conn && function_exists('tenant_sql')){
+        $qry = $conn->query("SELECT brand_id, COUNT(*) AS cnt FROM products WHERE delete_flag = 0".tenant_sql()." GROUP BY brand_id");
         if($qry){ while($r = $qry->fetch_assoc()) $cache[(int)$r['brand_id']] = (int)$r['cnt']; }
     }
     return $cache;
@@ -194,8 +194,8 @@ function ash_category_product_counts(){
     static $cache = null;
     if($cache !== null) return $cache;
     $cache = array();
-    if(isset($conn) && $conn){
-        $qry = $conn->query("SELECT category_id, COUNT(*) AS cnt FROM products WHERE delete_flag = 0 GROUP BY category_id");
+    if(isset($conn) && $conn && function_exists('tenant_sql')){
+        $qry = $conn->query("SELECT category_id, COUNT(*) AS cnt FROM products WHERE delete_flag = 0".tenant_sql()." GROUP BY category_id");
         if($qry){ while($r = $qry->fetch_assoc()) $cache[(int)$r['category_id']] = (int)$r['cnt']; }
     }
     return $cache;

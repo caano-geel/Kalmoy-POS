@@ -10,6 +10,18 @@ Class Master extends DBConnection {
 	public function __destruct(){
 		parent::__destruct();
 	}
+	private function _bid(){
+		return tenant_id();
+	}
+	private function _ts($alias = ''){
+		return tenant_sql($alias);
+	}
+	private function _own($table, $id){
+		if(!empty($id) && (int)$id > 0 && !tenant_owned($this->conn, $table, (int)$id)){
+			echo json_encode(array('status'=>'failed','msg'=>'Record not found or access denied.'));
+			exit;
+		}
+	}
 	function capture_err(){
 		if(!$this->conn->error)
 			return false;
@@ -22,6 +34,9 @@ Class Master extends DBConnection {
 	}
 	function save_brand(){
 		extract($_POST);
+		if(!empty($id)){
+			$this->_own('brands', $id);
+		}
 		$data = "";
 		foreach($_POST as $k =>$v){
 			if(!in_array($k,array('id'))){
@@ -30,7 +45,7 @@ Class Master extends DBConnection {
 				$data .= " `{$k}`='{$v}' ";
 			}
 		}
-		$check = $this->conn->query("SELECT * FROM `brands` where `name` = '{$name}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
+		$check = $this->conn->query("SELECT * FROM `brands` where business_id = '{$this->_bid()}' and  `name` = '{$name}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
 		if($this->capture_err())
 			return $this->capture_err();
 		if($check > 0){
@@ -40,9 +55,9 @@ Class Master extends DBConnection {
 			exit;
 		}
 		if(empty($id)){
-			$sql = "INSERT INTO `brands` set {$data} ";
+			$sql = "INSERT INTO `brands` set business_id = '{$this->_bid()}', {$data} ";
 		}else{
-			$sql = "UPDATE `brands` set {$data} where id = '{$id}' ";
+			$sql = "UPDATE `brands` set {$data} where id = '{$id}'{$this->_ts()} ";
 		}
 			$save = $this->conn->query($sql);
 		if($save){
@@ -78,7 +93,7 @@ Class Master extends DBConnection {
 				else
 				$upload = false;
 				if($upload){
-					$qry = $this->conn->query("UPDATE brands set `image_path` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$bid}' ");
+					$qry = $this->conn->query("UPDATE brands set `image_path` = CONCAT('{$fname}', '?v=',unix_timestamp(CURRENT_TIMESTAMP)) where id = '{$bid}'{$this->_ts()} ");
 				}
 				imagedestroy($temp);
 			}
@@ -93,7 +108,8 @@ Class Master extends DBConnection {
 	}
 	function delete_brand(){
 		extract($_POST);
-		$del = $this->conn->query("UPDATE `brands` set `delete_flag` = 1 where id = '{$id}'");
+		$this->_own('brands', $id);
+		$del = $this->conn->query("UPDATE `brands` set `delete_flag` = 1 where id = '{$id}'{$this->_ts()}");
 		if($del){
 			$resp['status'] = 'success';
 			$this->settings->set_flashdata('success'," Brand successfully deleted.");
@@ -106,6 +122,9 @@ Class Master extends DBConnection {
 	}
 	function save_category(){
 		extract($_POST);
+		if(!empty($id)){
+			$this->_own('categories', $id);
+		}
 		$data = "";
 		foreach($_POST as $k =>$v){
 			if(!in_array($k,array('id','description'))){
@@ -117,7 +136,7 @@ Class Master extends DBConnection {
 			if(!empty($data)) $data .=",";
 				$data .= " `description`='".addslashes(htmlentities($description))."' ";
 		}
-		$check = $this->conn->query("SELECT * FROM `categories` where `category` = '{$category}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
+		$check = $this->conn->query("SELECT * FROM `categories` where business_id = '{$this->_bid()}' and  `category` = '{$category}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
 		if($this->capture_err())
 			return $this->capture_err();
 		if($check > 0){
@@ -127,10 +146,10 @@ Class Master extends DBConnection {
 			exit;
 		}
 		if(empty($id)){
-			$sql = "INSERT INTO `categories` set {$data} ";
+			$sql = "INSERT INTO `categories` set business_id = '{$this->_bid()}', {$data} ";
 			$save = $this->conn->query($sql);
 		}else{
-			$sql = "UPDATE `categories` set {$data} where id = '{$id}' ";
+			$sql = "UPDATE `categories` set {$data} where id = '{$id}'{$this->_ts()} ";
 			$save = $this->conn->query($sql);
 		}
 		if($save){
@@ -147,7 +166,8 @@ Class Master extends DBConnection {
 	}
 	function delete_category(){
 		extract($_POST);
-		$del = $this->conn->query("UPDATE `categories` set delete_flag = 1 where id = '{$id}'");
+		$this->_own('categories', $id);
+		$del = $this->conn->query("UPDATE `categories` set delete_flag = 1 where id = '{$id}'{$this->_ts()}");
 		if($del){
 			$resp['status'] = 'success';
 			$this->settings->set_flashdata('success'," Category successfully deleted.");
@@ -179,7 +199,7 @@ Class Master extends DBConnection {
 				}
 			}
 		}
-		$check = $this->conn->query("SELECT * FROM `products` where `name` = '{$name}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
+		$check = $this->conn->query("SELECT * FROM `products` where business_id = '{$this->_bid()}' and  `name` = '{$name}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
 		if($this->capture_err())
 			return $this->capture_err();
 		if($check > 0){
@@ -189,7 +209,7 @@ Class Master extends DBConnection {
 			exit;
 		}
 		if(!empty($barcode)){
-			$check_barcode = $this->conn->query("SELECT * FROM `products` where `barcode` = '{$barcode}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
+			$check_barcode = $this->conn->query("SELECT * FROM `products` where business_id = '{$this->_bid()}' and  `barcode` = '{$barcode}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
 			if($check_barcode > 0){
 				$resp['status'] = 'failed';
 				$resp['msg'] = "Barcode already exists.";
@@ -198,9 +218,9 @@ Class Master extends DBConnection {
 			}
 		}
 		if(empty($id)){
-			$sql = "INSERT INTO `products` set {$data} ";
+			$sql = "INSERT INTO `products` set business_id = '{$this->_bid()}', {$data} ";
 		}else{
-			$sql = "UPDATE `products` set {$data} where id = '{$id}' ";
+			$sql = "UPDATE `products` set {$data} where id = '{$id}'{$this->_ts()} ";
 		}
 		$save = $this->conn->query($sql);
 		if($save){
@@ -272,7 +292,7 @@ Class Master extends DBConnection {
 	function delete_product(){
 		extract($_POST);
 		$product = $this->conn->query("SELECT name FROM products WHERE id = '{$id}' LIMIT 1")->fetch_assoc();
-		$del = $this->conn->query("UPDATE `products` set delete_flag = 1 where id = '{$id}'");
+		$del = $this->conn->query("UPDATE `products` set delete_flag = 1 where id = '{$id}'{$this->_ts()}");
 		if($del){
 			$resp['status'] = 'success';
 			$this->settings->set_flashdata('success'," Product successfully deleted.");
@@ -301,6 +321,12 @@ Class Master extends DBConnection {
 	}
 	function save_inventory(){
 		extract($_POST);
+		if(!empty($id)){
+			$this->_own('inventory', $id);
+		}
+		if(!empty($product_id) && !tenant_owned($this->conn, 'products', (int)$product_id)){
+			return json_encode(array('status'=>'failed','msg'=>'Product not found or access denied.'));
+		}
 		$data = "";
 		foreach($_POST as $k =>$v){
 			if(!in_array($k,array('id','description'))){
@@ -310,7 +336,7 @@ Class Master extends DBConnection {
 				$data .= " `{$k}`='{$v}' ";
 			}
 		}
-		$check = $this->conn->query("SELECT * FROM `inventory` where `product_id` = '{$product_id}' and variant = '{$variant}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
+		$check = $this->conn->query("SELECT * FROM `inventory` where business_id = '{$this->_bid()}' and  `product_id` = '{$product_id}' and variant = '{$variant}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
 		if($this->capture_err())
 			return $this->capture_err();
 		if($check > 0){
@@ -320,10 +346,10 @@ Class Master extends DBConnection {
 			exit;
 		}
 		if(empty($id)){
-			$sql = "INSERT INTO `inventory` set {$data} ";
+			$sql = "INSERT INTO `inventory` set business_id = '{$this->_bid()}', {$data} ";
 			$save = $this->conn->query($sql);
 		}else{
-			$sql = "UPDATE `inventory` set {$data} where id = '{$id}' ";
+			$sql = "UPDATE `inventory` set {$data} where id = '{$id}'{$this->_ts()} ";
 			$save = $this->conn->query($sql);
 		}
 		if($save){
@@ -333,7 +359,7 @@ Class Master extends DBConnection {
 			else
 				$this->settings->set_flashdata('success',"Inventory successfully updated.");
 			$inv_id = empty($id) ? $this->conn->insert_id : $id;
-			$info = $this->conn->query("SELECT p.name, i.variant FROM inventory i INNER JOIN products p ON p.id = i.product_id WHERE i.id = '{$inv_id}' LIMIT 1")->fetch_assoc();
+			$info = $this->conn->query("SELECT p.name, i.variant FROM inventory i INNER JOIN products p ON p.id = i.product_id WHERE i.id = '{$inv_id}'".tenant_sql('i')." LIMIT 1")->fetch_assoc();
 			$detail = $info ? stripslashes($info['name']).' ('.stripslashes($info['variant']).')' : 'Inventory #'.$inv_id;
 			admin_activity_log(empty($id) ? 'inventory_created' : 'inventory_updated', $detail);
 			notifications_sync_system();
@@ -345,8 +371,9 @@ Class Master extends DBConnection {
 	}
 	function delete_inventory(){
 		extract($_POST);
-		$info = $this->conn->query("SELECT p.name, i.variant FROM inventory i INNER JOIN products p ON p.id = i.product_id WHERE i.id = '{$id}' LIMIT 1")->fetch_assoc();
-		$del = $this->conn->query("DELETE FROM `inventory` where id = '{$id}'");
+		$this->_own('inventory', $id);
+		$info = $this->conn->query("SELECT p.name, i.variant FROM inventory i INNER JOIN products p ON p.id = i.product_id WHERE i.id = '{$id}'".tenant_sql('i')." LIMIT 1")->fetch_assoc();
+		$del = $this->conn->query("DELETE FROM `inventory` where id = '{$id}'{$this->_ts()}");
 		if($del){
 			$resp['status'] = 'success';
 			$this->settings->set_flashdata('success',"Invenory successfully deleted.");
@@ -369,7 +396,7 @@ Class Master extends DBConnection {
 				$data .= " `{$k}`='{$v}' ";
 			}
 		}
-		$check = $this->conn->query("SELECT * FROM `clients` where `email` = '{$email}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
+		$check = $this->conn->query("SELECT * FROM `clients` where business_id = '{$this->_bid()}' and  `email` = '{$email}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
 		if($this->capture_err())
 			return $this->capture_err();
 		if($check > 0){
@@ -379,9 +406,9 @@ Class Master extends DBConnection {
 			exit;
 		}
 		if(empty($id)){
-			$sql = "INSERT INTO `clients` set {$data} ";
+			$sql = "INSERT INTO `clients` set business_id = '{$this->_bid()}', {$data} ";
 		}else{
-			$sql = "UPDATE `clients` set {$data} where id = '{$id}' ";
+			$sql = "UPDATE `clients` set {$data} where id = '{$id}'{$this->_ts()} ";
 		}
 			$save = $this->conn->query($sql);
 		if($save){
@@ -419,7 +446,7 @@ Class Master extends DBConnection {
 		if($check > 0){
 			$sql = "UPDATE `cart` set quantity = quantity + {$quantity} where `inventory_id` = '{$inventory_id}' and client_id = ".$this->settings->userdata('id');
 		}else{
-			$sql = "INSERT INTO `cart` set {$data} ";
+			$sql = "INSERT INTO `cart` set business_id = '{$this->_bid()}', {$data} ";
 		}
 		
 		$save = $this->conn->query($sql);
@@ -463,7 +490,7 @@ Class Master extends DBConnection {
 	}
 	function delete_cart(){
 		extract($_POST);
-		$delete = $this->conn->query("DELETE FROM `cart` where id = '{$id}'");
+		$delete = $this->conn->query("DELETE FROM `cart` where id = '{$id}'{$this->_ts()}");
 		if($this->capture_err())
 			return $this->capture_err();
 		if($delete){
@@ -479,7 +506,7 @@ Class Master extends DBConnection {
 		if(class_exists('CustomerDebtService')){
 			CustomerDebtService::void_debt_for_order($this->conn, (int)$id);
 		}
-		$delete = $this->conn->query("DELETE FROM `orders` where id = '{$id}'");
+		$delete = $this->conn->query("DELETE FROM `orders` where id = '{$id}'{$this->_ts()}");
 		$delete2 = $this->conn->query("DELETE FROM `order_list` where order_id = '{$id}'");
 		$delete3 = $this->conn->query("DELETE FROM `sales` where order_id = '{$id}'");
 		if($this->capture_err())
@@ -498,7 +525,7 @@ Class Master extends DBConnection {
 			$prefix = date("Ym");
 			$code = sprintf("%'.05d",1);
 			while(true){
-				$check = $this->conn->query("SELECT * FROM `orders` where ref_code = '{$prefix}{$code}' ")->num_rows;
+				$check = $this->conn->query("SELECT * FROM `orders` where business_id = '{$this->_bid()}' and  ref_code = '{$prefix}{$code}' ")->num_rows;
 				if($check > 0){
 					$code = sprintf("%'.05d",ceil($code) + 1);
 				}else{
@@ -650,14 +677,14 @@ Class Master extends DBConnection {
 
 		if($email !== ''){
 			$email_esc = $this->conn->real_escape_string($email);
-			$check_sql = "SELECT id FROM `clients` WHERE `email` = '{$email_esc}'";
+			$check_sql = "SELECT id FROM `clients` where business_id = '{$this->_bid()}' and  `email` = '{$email_esc}'";
 			if($id > 0) $check_sql .= " AND id != {$id}";
 			if($this->conn->query($check_sql)->num_rows > 0){
 				$resp['msg'] = 'Email already taken.';
 				return json_encode($resp);
 			}
 		}elseif($id > 0){
-			$existing = $this->conn->query("SELECT email FROM `clients` WHERE id = {$id} LIMIT 1");
+			$existing = $this->conn->query("SELECT email FROM `clients` where business_id = '{$this->_bid()}' and  id = {$id} LIMIT 1");
 			if($existing && $existing->num_rows){
 				$old_email = trim($existing->fetch_assoc()['email']);
 				if($old_email !== '' && !preg_match('/@customer\.local$/i', $old_email)){
@@ -708,7 +735,7 @@ Class Master extends DBConnection {
 	}
 	function delete_client(){
 		extract($_POST);
-		$delete = $this->conn->query("UPDATE `clients` set delete_flag = 1 where id = '{$id}'");
+		$delete = $this->conn->query("UPDATE `clients` set delete_flag = 1 where id = '{$id}'{$this->_ts()}");
 		if($delete){
 			$resp['status'] = 'success';
 			$this->settings->set_flashdata('success'," Client successfully deleted");
@@ -726,7 +753,7 @@ Class Master extends DBConnection {
 	}
 	private function get_pos_client_id(){
 		$email = 'pos.walkin@local';
-		$check = $this->conn->query("SELECT id FROM `clients` WHERE email = '{$email}' AND delete_flag = 0 LIMIT 1");
+		$check = $this->conn->query("SELECT id FROM `clients` where business_id = '{$this->_bid()}' and  email = '{$email}' AND delete_flag = 0 LIMIT 1");
 		if($check && $check->num_rows > 0){
 			return (int)$check->fetch_assoc()['id'];
 		}
@@ -740,19 +767,14 @@ Class Master extends DBConnection {
 	private function get_inventory_stock($inventory_id){
 		$inventory_id = (int)$inventory_id;
 		$cost_select = db_table_has_column('inventory', 'cost_price') ? ', i.cost_price' : '';
+		$sold_sub = inventory_sold_subquery_sql();
 		$row = $this->conn->query("SELECT i.id, i.price{$cost_select}, i.quantity, p.name, p.barcode, i.variant, b.name as bname,
 			(i.quantity - IFNULL(sold.qty, 0)) AS stock
 			FROM inventory i
 			INNER JOIN products p ON p.id = i.product_id
 			INNER JOIN brands b ON p.brand_id = b.id
-			LEFT JOIN (
-				SELECT ol.inventory_id, SUM(ol.quantity) AS qty
-				FROM order_list ol
-				INNER JOIN orders o ON o.id = ol.order_id
-				WHERE o.status != 4
-				GROUP BY ol.inventory_id
-			) sold ON sold.inventory_id = i.id
-			WHERE i.id = '{$inventory_id}' AND p.delete_flag = 0 AND p.status = 1
+			LEFT JOIN {$sold_sub} sold ON sold.inventory_id = i.id
+			WHERE i.id = '{$inventory_id}' AND p.delete_flag = 0 AND p.status = 1".tenant_sql('i')."
 			LIMIT 1")->fetch_assoc();
 		return $row ?: null;
 	}
@@ -774,19 +796,14 @@ Class Master extends DBConnection {
 		}
 		$q_esc = $this->conn->real_escape_string($q);
 		$like = '%'.$q_esc.'%';
+		$sold_sub = inventory_sold_subquery_sql();
 		$sql = "SELECT i.id AS inventory_id, i.variant, i.price, p.name, p.barcode, b.name AS bname,
 			(i.quantity - IFNULL(sold.qty, 0)) AS stock
 			FROM inventory i
 			INNER JOIN products p ON p.id = i.product_id
 			INNER JOIN brands b ON p.brand_id = b.id
-			LEFT JOIN (
-				SELECT ol.inventory_id, SUM(ol.quantity) AS qty
-				FROM order_list ol
-				INNER JOIN orders o ON o.id = ol.order_id
-				WHERE o.status != 4
-				GROUP BY ol.inventory_id
-			) sold ON sold.inventory_id = i.id
-			WHERE p.delete_flag = 0 AND p.status = 1
+			LEFT JOIN {$sold_sub} sold ON sold.inventory_id = i.id
+			WHERE p.delete_flag = 0 AND p.status = 1".tenant_sql('i')."
 			AND (p.barcode = '{$q_esc}' OR p.name LIKE '{$like}' OR p.barcode LIKE '{$like}')
 			ORDER BY (p.barcode = '{$q_esc}') DESC, p.name ASC, i.variant ASC
 			LIMIT 25";
@@ -807,7 +824,7 @@ Class Master extends DBConnection {
 		$email = $this->conn->real_escape_string(CustomerDebtService::WALKIN_EMAIL);
 		$sql = "SELECT id, firstname, lastname, contact, email,
 			CONCAT(firstname,' ',lastname) AS fullname
-			FROM clients WHERE delete_flag = 0 AND status = 1 AND email != '{$email}'";
+			FROM clients WHERE delete_flag = 0 AND status = 1 AND email != '{$email}'".tenant_sql();
 		if($q !== ''){
 			$q_esc = $this->conn->real_escape_string($q);
 			$like = '%'.$q_esc.'%';
@@ -988,7 +1005,7 @@ Class Master extends DBConnection {
 		$prefix = date("Ym");
 		$code = sprintf("%'.05d",1);
 		while(true){
-			$check = $this->conn->query("SELECT id FROM `orders` WHERE ref_code = '{$prefix}{$code}' LIMIT 1")->num_rows;
+			$check = $this->conn->query("SELECT id FROM `orders` where business_id = '{$this->_bid()}' and  ref_code = '{$prefix}{$code}' LIMIT 1")->num_rows;
 			if($check > 0){
 				$code = sprintf("%'.05d",ceil($code) + 1);
 			}else{
@@ -1402,14 +1419,17 @@ Class Master extends DBConnection {
 			$resp['msg'] = 'Backup module is not installed.';
 			return json_encode($resp);
 		}
+		if(tenant_id() <= 0){
+			$resp['msg'] = 'No business context for backup.';
+			return json_encode($resp);
+		}
 		$dir = backup_dir_path();
 		$now = date('Y-m-d H:i:s');
 		$filename = app_backup_filename($now);
 		$filepath = $dir.$filename;
-		$dump = $this->generate_sql_dump();
-		if($dump === false){
-			$resp['msg'] = 'Failed to generate backup.';
-			return json_encode($resp);
+		$dump = tenant_generate_sql_dump($this->conn);
+		if($dump === false || trim($dump) === ''){
+			$dump = "-- Kalmoy POS tenant backup (business_id=".tenant_id().")\n-- Empty business data snapshot\n";
 		}
 		if(file_put_contents($filepath, $dump) === false){
 			$resp['msg'] = 'Failed to write backup file.';
@@ -1418,10 +1438,11 @@ Class Master extends DBConnection {
 		$size = filesize($filepath);
 		$user_id = isset($_SESSION['userdata']['id']) ? (int)$_SESSION['userdata']['id'] : 0;
 		$user_name = dashboard_user_display_name();
+		$bid = tenant_id();
 		$name_esc = $this->conn->real_escape_string($user_name);
 		$file_esc = $this->conn->real_escape_string($filename);
-		$this->conn->query("INSERT INTO backup_logs SET filename = '{$file_esc}', file_size = '{$size}',
-			created_by = '{$user_id}', created_by_name = '{$name_esc}', status = 'success', message = 'Backup created successfully', date_created = '{$now}'");
+		$this->conn->query("INSERT INTO backup_logs SET business_id = '{$bid}', filename = '{$file_esc}', file_size = '{$size}',
+			created_by = '{$user_id}', created_by_name = '{$name_esc}', status = 'success', message = 'Tenant backup created successfully', date_created = '{$now}'");
 		admin_activity_log('backup_created', $filename.' ('.format_file_size($size).')');
 		admin_notify('success', 'Backup Completed', 'Database backup '.$filename.' created successfully.', base_url.'admin/?page=backup', 'backup_'.$filename);
 		$resp['status'] = 'success';
@@ -1460,54 +1481,18 @@ Class Master extends DBConnection {
 		$resp = array('status' => 'failed', 'msg' => 'Unable to delete backup.');
 		if(admin_is_cashier()) return json_encode(array('status' => 'failed', 'msg' => 'Access denied.'));
 		$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-		$row = $this->conn->query("SELECT * FROM backup_logs WHERE id = '{$id}'")->fetch_assoc();
+		$row = $this->conn->query("SELECT * FROM backup_logs WHERE id = '{$id}'".tenant_sql())->fetch_assoc();
 		if(!$row) return json_encode($resp);
 		$path = backup_dir_path().$row['filename'];
 		if(is_file($path)) @unlink($path);
-		$this->conn->query("DELETE FROM backup_logs WHERE id = '{$id}'");
+		$this->conn->query("DELETE FROM backup_logs WHERE id = '{$id}'".tenant_sql());
 		admin_activity_log('backup_deleted', $row['filename']);
 		$resp['status'] = 'success';
 		$this->settings->set_flashdata('success', 'Backup deleted.');
 		return json_encode($resp);
 	}
 	function restore_backup(){
-		$resp = array('status' => 'failed', 'msg' => 'Unable to restore backup.');
-		if(admin_is_cashier()){
-			$resp['msg'] = 'Only administrators can restore backups.';
-			return json_encode($resp);
-		}
-		$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-		$row = $this->conn->query("SELECT * FROM backup_logs WHERE id = '{$id}'")->fetch_assoc();
-		if(!$row){
-			$resp['msg'] = 'Backup not found.';
-			return json_encode($resp);
-		}
-		$path = backup_dir_path().$row['filename'];
-		if(!is_file($path)){
-			$resp['msg'] = 'Backup file missing.';
-			return json_encode($resp);
-		}
-		$sql = file_get_contents($path);
-		if($sql === false || trim($sql) === ''){
-			$resp['msg'] = 'Backup file is empty.';
-			return json_encode($resp);
-		}
-		$this->conn->query('SET FOREIGN_KEY_CHECKS=0');
-		$statements = preg_split('/;\s*[\r\n]+/', $sql);
-		foreach($statements as $statement){
-			$statement = trim($statement);
-			if($statement === '' || strpos($statement, '--') === 0) continue;
-			if(!$this->conn->query($statement)){
-				$this->conn->query('SET FOREIGN_KEY_CHECKS=1');
-				$resp['msg'] = 'Restore failed: '.$this->conn->error;
-				return json_encode($resp);
-			}
-		}
-		$this->conn->query('SET FOREIGN_KEY_CHECKS=1');
-		admin_activity_log('backup_restored', $row['filename']);
-		$resp['status'] = 'success';
-		$resp['msg'] = 'Database restored successfully from '.$row['filename'].'.';
-		$this->settings->set_flashdata('success', $resp['msg']);
+		$resp = array('status' => 'failed', 'msg' => 'Restore is disabled in multi-tenant mode. Contact Kalmoy Tech Solutions for assistance.');
 		return json_encode($resp);
 	}
 	function download_backup(){
@@ -1516,7 +1501,7 @@ Class Master extends DBConnection {
 			exit;
 		}
 		$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-		$row = $this->conn->query("SELECT * FROM backup_logs WHERE id = '{$id}'")->fetch_assoc();
+		$row = $this->conn->query("SELECT * FROM backup_logs WHERE id = '{$id}'".tenant_sql())->fetch_assoc();
 		if(!$row){
 			header('HTTP/1.1 404 Not Found');
 			exit;
@@ -1632,19 +1617,14 @@ Class Master extends DBConnection {
 		}
 		$q_esc = $this->conn->real_escape_string($q);
 		$like = '%'.$q_esc.'%';
+		$sold_sub = inventory_sold_subquery_sql();
 		$sql = "SELECT i.id AS inventory_id, i.variant, i.price, p.name, p.barcode, b.name AS bname,
 			(i.quantity - IFNULL(sold.qty, 0)) AS stock
 			FROM inventory i
 			INNER JOIN products p ON p.id = i.product_id
 			INNER JOIN brands b ON p.brand_id = b.id
-			LEFT JOIN (
-				SELECT ol.inventory_id, SUM(ol.quantity) AS qty
-				FROM order_list ol
-				INNER JOIN orders o ON o.id = ol.order_id
-				WHERE o.status != 4
-				GROUP BY ol.inventory_id
-			) sold ON sold.inventory_id = i.id
-			WHERE p.delete_flag = 0 AND p.status = 1
+			LEFT JOIN {$sold_sub} sold ON sold.inventory_id = i.id
+			WHERE p.delete_flag = 0 AND p.status = 1".tenant_sql('i')."
 			AND (p.barcode = '{$q_esc}' OR p.name LIKE '{$like}' OR p.barcode LIKE '{$like}')
 			ORDER BY (p.barcode = '{$q_esc}') DESC, p.name ASC, i.variant ASC
 			LIMIT 25";
@@ -1901,35 +1881,8 @@ Class Master extends DBConnection {
 		]);
 	}
 	function clean_business_data(){
-		$resp = array('status' => 'failed', 'msg' => 'Unable to clean data.');
-		if(admin_is_cashier() && !admin_cashier_has_permission('clean_data')){
-			$resp['msg'] = 'Access denied.';
-			return json_encode($resp);
-		}
-		if(!admin_is_owner() && admin_is_cashier()){
-			$resp['msg'] = 'Access denied.';
-			return json_encode($resp);
-		}
-		if($_SERVER['REQUEST_METHOD'] !== 'POST'){
-			$resp['msg'] = 'Invalid request method.';
-			return json_encode($resp);
-		}
-		require_once(__DIR__.'/BusinessDataCleaner.php');
-		$scope = isset($_POST['scope']) ? strtolower(trim($_POST['scope'])) : '';
-		$confirm_text = isset($_POST['confirm_text']) ? trim($_POST['confirm_text']) : '';
-		if($scope === BusinessDataCleaner::SCOPE_FULL && $confirm_text !== 'CONFIRM'){
-			$resp['msg'] = 'Type CONFIRM to run a full business reset.';
-			return json_encode($resp);
-		}
-		$options = array(
-			'reset_stock' => !isset($_POST['reset_stock']) || (int)$_POST['reset_stock'] === 1,
-		);
-		$cleaner = new BusinessDataCleaner($this->conn);
-		$result = $cleaner->run($scope, $options);
-		if(isset($result['status']) && $result['status'] === 'success'){
-			$this->settings->set_flashdata('success', $result['msg']);
-		}
-		return json_encode($result);
+		$resp = array('status' => 'failed', 'msg' => 'Data clean actions are disabled in multi-tenant mode. Contact Kalmoy Tech Solutions for assistance.');
+		return json_encode($resp);
 	}
 }
 
@@ -1949,6 +1902,10 @@ $admin_only_actions = array(
 if(in_array($action, $admin_only_actions, true) && admin_cashier_api_denied($action)){
 	echo json_encode(['status'=>'failed','msg'=>'Access denied.']);
 	exit;
+}
+$public_api_actions = array('register','add_to_cart','update_cart_qty','delete_cart','empty_cart');
+if(!in_array($action, $public_api_actions, true)){
+	tenant_api_guard();
 }
 switch ($action) {
 	case 'save_brand':

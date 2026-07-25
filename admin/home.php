@@ -5,11 +5,11 @@ $today = date('Y-m-d');
 if($is_admin_dashboard) notifications_sync_system();
 
 $total_stocks = 0;
-$inv_row = $conn->query("SELECT SUM(quantity) AS total FROM inventory")->fetch_assoc();
-$sold_row = $conn->query("SELECT SUM(quantity) AS total FROM order_list WHERE order_id IN (SELECT order_id FROM sales)")->fetch_assoc();
+$inv_row = $conn->query("SELECT SUM(quantity) AS total FROM inventory WHERE 1=1".tenant_sql())->fetch_assoc();
+$sold_row = $conn->query("SELECT SUM(quantity) AS total FROM order_list WHERE order_id IN (SELECT order_id FROM sales WHERE 1=1".tenant_sql().")".tenant_sql())->fetch_assoc();
 $total_stocks = (float)($inv_row['total'] ?? 0) - (float)($sold_row['total'] ?? 0);
 
-$pending_orders = (int)$conn->query("SELECT COUNT(*) AS total FROM orders WHERE status = '0'")->fetch_assoc()['total'];
+$pending_orders = (int)$conn->query("SELECT COUNT(*) AS total FROM orders WHERE status = '0'".tenant_sql())->fetch_assoc()['total'];
 $orders_today = dashboard_orders_today_count();
 $inventory_value = dashboard_inventory_value();
 $users_count = $is_admin_dashboard ? dashboard_users_count() : 0;
@@ -28,11 +28,11 @@ $last_backup_label = '&mdash;';
 $dash_insight_charts = array('profit' => array(), 'expenses' => array());
 
 if($is_admin_dashboard){
-    $sales_today = (float)$conn->query("SELECT COALESCE(SUM(amount), 0) AS total FROM orders WHERE DATE(date_created) = '{$today}' AND status != 4")->fetch_assoc()['total'];
+    $sales_today = (float)$conn->query("SELECT COALESCE(SUM(amount), 0) AS total FROM orders WHERE DATE(date_created) = '{$today}' AND status != 4".tenant_sql())->fetch_assoc()['total'];
     $sales_mtd = profit_analytics_sales_total(report_resolve_range('month')['start'], report_resolve_range('month')['end']);
     $sales_ytd = profit_analytics_sales_total(report_resolve_range('year')['start'], report_resolve_range('year')['end']);
     $sales_alltime = profit_analytics_sales_total(business_operating_bounds()['start'], business_operating_bounds()['end']);
-    $registered_clients = (int)$conn->query("SELECT COUNT(*) AS total FROM clients WHERE delete_flag = 0")->fetch_assoc()['total'];
+    $registered_clients = (int)$conn->query("SELECT COUNT(*) AS total FROM clients WHERE delete_flag = 0".tenant_sql())->fetch_assoc()['total'];
     $stock_alert_counts = inventory_stock_counts();
     $profit_today = dashboard_profit_total($today, $today);
     $profit_mtd = dashboard_profit_total(report_resolve_range('month')['start'], report_resolve_range('month')['end']);

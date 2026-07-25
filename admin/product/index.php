@@ -38,7 +38,7 @@ if($_settings->chk_flashdata('success')): ?>
 				</thead>
 				<tbody>
 					<?php 
-					$qry = $conn->query("SELECT p.*,b.name as bname from `products` p inner join brands b on p.brand_id = b.id where p.delete_flag = 0 order by (p.name) asc ");
+					$qry = $conn->query("SELECT p.*,b.name as bname from `products` p inner join brands b on p.brand_id = b.id where p.delete_flag = 0".tenant_sql('p')." order by (p.name) asc ");
 					while($row = $qry->fetch_assoc()):
 						foreach($row as $k=> $v){
 							$row[$k] = trim(stripslashes($v));

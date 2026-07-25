@@ -102,11 +102,62 @@
         ashAlert('Please contact your store administrator to reset your password.', 'info', 'Password Reset');
       }
     });
-    $('#login-frm').on('submit', function(){
+
+    function loginSetLoading($btn, loading){
+      $btn.prop('disabled', loading);
+      $btn.find('.btn-label').toggleClass('d-none', loading);
+      $btn.find('.spinner-border').toggleClass('d-none', !loading);
+    }
+
+    function loginShowError($frm, message){
+      if($('.err_msg').length) $('.err_msg').remove();
+      var safeMsg = $('<div>').text(message || 'Incorrect username or password').html();
+      $frm.prepend("<div class='alert alert-danger text-white err_msg'><i class='fa fa-exclamation-triangle'></i> " + safeMsg + "</div>");
+      $frm.find('input').addClass('is-invalid');
+      $frm.find('[name="username"]').focus();
+    }
+
+    $('#login-frm').off('submit').on('submit', function(e){
+      e.preventDefault();
+      var $frm = $(this);
       var $btn = $('#login-submit-btn');
-      $btn.prop('disabled', true);
-      $btn.find('.btn-label').addClass('d-none');
-      $btn.find('.spinner-border').removeClass('d-none');
+      if($btn.prop('disabled')) return false;
+
+      loginSetLoading($btn, true);
+      $frm.find('input').removeClass('is-invalid');
+      if($('.err_msg').length) $('.err_msg').remove();
+
+      var redirecting = false;
+      $.ajax({
+        url: (typeof _base_url_ !== 'undefined' ? _base_url_ : '<?php echo base_url ?>') + 'classes/Login.php?f=login',
+        method: 'POST',
+        data: $frm.serialize(),
+        dataType: 'json',
+        success: function(resp){
+          if(!resp || typeof resp !== 'object'){
+            loginShowError($frm, 'Unexpected server response. Please try again.');
+            return;
+          }
+          if(resp.status === 'success'){
+            redirecting = true;
+            var dest = resp.redirect
+              ? ((typeof _base_url_ !== 'undefined' ? _base_url_ : '<?php echo base_url ?>') + resp.redirect)
+              : ((typeof _base_url_ !== 'undefined' ? _base_url_ : '<?php echo base_url ?>') + 'admin/');
+            location.replace(dest);
+            return;
+          }
+          loginShowError($frm, resp.msg || 'Incorrect username or password');
+        },
+        error: function(){
+          loginShowError($frm, 'Unable to sign in. Check your connection and try again.');
+        },
+        complete: function(){
+          if(!redirecting){
+            loginSetLoading($btn, false);
+          }
+        }
+      });
+      return false;
     });
   });
 </script>
