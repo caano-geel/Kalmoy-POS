@@ -54,7 +54,7 @@ if (!function_exists('seo_default_image')) {
 if (!function_exists('seo_favicon_url')) {
     function seo_favicon_url()
     {
-        return seo_public_base_url() . 'assets/img/kalmoy_logo.png';
+        return seo_public_base_url() . 'assets/img/Kalmoypos.png';
     }
 }
 

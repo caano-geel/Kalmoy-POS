@@ -568,12 +568,67 @@ body.login-page .custom-control-label {
     font-size: 0.82rem;
 }
 
-body.login-page a.ash-forgot-link {
-    color: rgba(255,255,255,.85);
-    font-size: 0.78rem;
+
+/**
+ * Enhancing Forget Password link visibility on login page/ Waaan Hagaajini halkaa 
+
+ */
+
+/* ==========================================
+   Forgot Password Link - Kalmoy POS
+========================================== */
+body.login-page a.ash-forgot-link{
+    color: rgba(255,255,255,.90);
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: .2px;
+    position: relative;
+    transition:
+        color .30s ease,
+        text-shadow .30s ease,
+        transform .30s ease;
 }
 
-body.login-page a.ash-forgot-link:hover { color: #fff; }
+/* Hover */
+body.login-page a.ash-forgot-link:hover{
+    color: #7CB8FF;
+    text-shadow: 0 0 10px rgba(124,184,255,.45);
+    transform: translateY(-1px);
+}
+
+/* Animated Underline */
+body.login-page a.ash-forgot-link::after{
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    width: 0;
+    height: 2px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #5DAEFF, #A9D4FF);
+    transform: translateX(-50%);
+    transition: width .30s ease;
+}
+
+body.login-page a.ash-forgot-link:hover::after{
+    width: 100%;
+}
+
+/* Keyboard Focus */
+body.login-page a.ash-forgot-link:focus{
+    outline: none;
+    color: #7CB8FF;
+}
+
+body.login-page a.ash-forgot-link:focus::after{
+    width: 100%;
+}
+
+
+
+
+
 
 /* Dashboard compact tables — no horizontal scroll */
 table.dash-compact-table.ash-table {

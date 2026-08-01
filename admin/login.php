@@ -1,4 +1,4 @@
-<?php require_once('../config.php') ?>
+﻿<?php require_once('../config.php') ?>
 <!DOCTYPE html>
 <html lang="en" class="" style="height: auto;">
  <?php require_once('inc/header.php') ?>
@@ -7,12 +7,12 @@
     start_loader()
   </script>
   <style>
-    body.login-page{
-      background-image: url("<?php echo validate_image($_settings->info('cover')) ?>");
-      background-size:cover;
-      background-repeat:no-repeat;
-      background-position:center;
-      min-height:100vh;
+    body.login-page {
+      background-image: url('<?php echo base_url; ?>assets/branding/cover.jpg') !important;
+      background-size: cover !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+      min-height: 100vh;
     }
     #page-title{
       text-shadow: 0 2px 12px rgba(0,0,0,.35);
@@ -23,16 +23,19 @@
       padding: 0.25rem 1rem !important;
     }
   </style>
-  <h1 class="text-center text-white px-4 py-3" id="page-title"><b><?php echo $_settings->info('name') ?></b></h1>
+
+<!--
+<h1 class="text-center text-white px-4 py-3" id="page-title"><b><?php echo $_settings->info('name') ?></b></h1>
+-->
 <div class="login-box">
   <div class="text-center mb-3">
     <span class="system-logo-wrapper system-logo-login system-favicon-preview">
-      <img src="<?php echo validate_image($_settings->info('logo')) ?>" alt="<?php echo htmlspecialchars($_settings->info('short_name')) ?>">
-    </span>
+<img src="<?php echo base_url ?>assets/img/kalmoy_logo.gif"
+     alt="Kalmoy POS Logo">    </span>
   </div>
   <div class="card ash-login-glass border-0 my-2">
     <div class="card-body">
-      <p class="login-box-msg text-center mb-3">Sign in to your account</p>
+      <p class="login-box-msg text-center mb-3">Sign in to your Kalmoy Pos account</p>
       <form id="login-frm" action="" method="post">
         <div class="input-group mb-3">
           <input type="text" class="form-control" name="username" id="login-username" autofocus placeholder="Username" autocomplete="username">
@@ -163,3 +166,4 @@
 </script>
 </body>
 </html>
+
