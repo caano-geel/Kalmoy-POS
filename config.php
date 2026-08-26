@@ -736,6 +736,8 @@ function dashboard_sales_report_url($date_start, $date_end, $payment = ''){
     if($payment !== '') $url .= '&payment_method='.urlencode($payment);
     return $url;
 }
+
+/*
 function dashboard_inventory_value(){
     global $conn;
     if(!isset($conn) || !$conn) return 0;
@@ -752,6 +754,53 @@ function dashboard_inventory_value(){
     }
     return 0;
 }
+    */
+
+//Stock Value baan badalayaa
+
+function dashboard_inventory_value(){
+
+    global $conn;
+
+    if(!isset($conn) || !$conn) return 0;
+
+    $cost_col = app_cost_price_column();
+
+    if(!$cost_col) return 0;
+
+    $avail_sql = inventory_available_stock_sql('i');
+
+    $sold_sub = inventory_sold_subquery_sql();
+
+    $sql = "SELECT COALESCE(
+                SUM(GREATEST({$avail_sql}, 0) * COALESCE(i.`{$cost_col}`, 0)),
+                0
+            ) AS total
+
+        FROM inventory i
+
+        INNER JOIN products p ON p.id = i.product_id
+
+        LEFT JOIN {$sold_sub} sold ON sold.inventory_id = i.id
+
+        WHERE p.delete_flag = 0
+        AND p.status = 1".tenant_sql('i');
+
+    $qry = $conn->query($sql);
+
+    if($qry && ($row = $qry->fetch_assoc())){
+
+        return (float)$row['total'];
+
+    }
+
+    return 0;
+
+}
+
+
+
+
 function dashboard_users_count(){
     global $conn;
     if(!isset($conn) || !$conn) return 0;

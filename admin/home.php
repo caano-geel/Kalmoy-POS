@@ -305,9 +305,9 @@ function dash_mini_stat($label, $value, $icon, $icon_bg, $href = ''){
                 <?php if($is_admin_dashboard): ?>
                 <div class="col-6 col-lg-3 ash-stat-col"><?php echo dash_mini_stat('Low Stock Items', format_num($stock_alert_counts['low']), 'fa-exclamation-triangle', 'bg-warning', $url_inventory_low) ?></div>
                 <div class="col-6 col-lg-3 ash-stat-col"><?php echo dash_mini_stat('Out of Stock', format_num($stock_alert_counts['out']), 'fa-times-circle', 'bg-danger', $url_inventory_out) ?></div>
-                <div class="col-6 col-lg-3 ash-stat-col"><?php echo dash_mini_stat('Stock Value (Retail)', format_price($inventory_value), 'fa-tags', 'bg-primary', $url_inventory) ?></div>
+                <div class="col-6 col-lg-3 ash-stat-col"><?php echo dash_mini_stat('Stock Value (Cost)', format_price($inventory_value), 'fa-tags', 'bg-primary', $url_inventory) ?></div>
                 <?php else: ?>
-                <div class="col-6 col-lg-3 ash-stat-col"><?php echo dash_mini_stat('Stock Value (Retail)', format_price($inventory_value), 'fa-tags', 'bg-primary', $url_inventory) ?></div>
+                <div class="col-6 col-lg-3 ash-stat-col"><?php echo dash_mini_stat('Stock Value (Cost)', format_price($inventory_value), 'fa-tags', 'bg-primary', $url_inventory) ?></div>
                 <div class="col-6 col-lg-3 ash-stat-col">
                     <a href="<?php echo base_url ?>admin/?page=pos" class="dash-mini-link d-block h-100">
                         <div class="dash-mini-stat h-100 dash-mini-clickable">
