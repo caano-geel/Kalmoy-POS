@@ -77,36 +77,19 @@ if (!function_exists('tenant_subscription_status')) {
         if (in_array($bstatus, array('suspended', 'inactive', 'cancelled'), true)) {
             return array('allowed' => false, 'status' => $bstatus, 'message' => 'This business account is suspended.');
         }
-        $sq = $conn->query("SELECT * FROM subscriptions WHERE business_id = '{$bid}' ORDER BY id DESC LIMIT 1");
-        if (!$sq || !$sq->num_rows) {
+        $effective = SubscriptionService::effective($conn, $bid);
+        if (empty($effective['subscription'])) {
             return array('allowed' => false, 'status' => 'none', 'message' => 'No active subscription.');
         }
-        $sub = $sq->fetch_assoc();
-        $now = time();
-        if ($sub['status'] === 'suspended') {
-            return array('allowed' => false, 'status' => 'suspended', 'message' => 'Subscription suspended.');
-        }
-        if ($sub['status'] === 'cancelled') {
-            return array('allowed' => false, 'status' => 'cancelled', 'message' => 'Subscription cancelled.');
-        }
-        if ($sub['status'] === 'trial') {
-            $end = $sub['trial_ends_at'] ? strtotime($sub['trial_ends_at']) : 0;
-            if ($end > 0 && $now > $end) {
-                return array('allowed' => false, 'status' => 'expired', 'message' => 'Trial period has expired.');
-            }
-            return array('allowed' => true, 'status' => 'trial', 'message' => 'Trial active.');
-        }
-        if ($sub['status'] === 'active') {
-            $end = $sub['current_period_end'] ? strtotime($sub['current_period_end']) : 0;
-            if ($end > 0 && $now > $end) {
-                return array('allowed' => false, 'status' => 'expired', 'message' => 'Subscription has expired.');
-            }
-            return array('allowed' => true, 'status' => 'active', 'message' => 'Subscription active.');
-        }
-        if ($sub['status'] === 'expired') {
-            return array('allowed' => false, 'status' => 'expired', 'message' => 'Subscription has expired.');
-        }
-        return array('allowed' => false, 'status' => $sub['status'], 'message' => 'Subscription not valid.');
+        $messages = array(
+            'trial' => 'Trial active.',
+            'active' => 'Subscription active.',
+            'expired' => 'Subscription has expired.',
+            'suspended' => 'Subscription suspended.',
+            'cancelled' => 'Subscription cancelled.',
+        );
+        $status = $effective['status'];
+        return array('allowed' => !empty($effective['allowed']), 'status' => $status, 'message' => isset($messages[$status]) ? $messages[$status] : 'Subscription not valid.', 'subscription' => $effective['subscription']);
     }
 }
 

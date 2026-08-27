@@ -268,6 +268,13 @@ class Platform extends DBConnection
         if ($bid <= 0 || $amount <= 0) {
             return json_encode(array('status' => 'failed', 'msg' => 'Invalid payment data'));
         }
+        $planStmt = $this->conn->prepare('SELECT price_monthly FROM subscription_plans WHERE id = ? AND status = 1 LIMIT 1');
+        $planStmt->bind_param('i', $plan_id);
+        $planStmt->execute();
+        $plan = $planStmt->get_result()->fetch_assoc();
+        if (!$plan || abs((float) $plan['price_monthly'] - $amount) > 0.01) {
+            return json_encode(array('status' => 'failed', 'msg' => 'Payment amount must match the selected monthly plan price.'));
+        }
         $sub = $this->conn->query("SELECT id FROM subscriptions WHERE business_id={$bid} ORDER BY id DESC LIMIT 1")->fetch_assoc();
         $subId = $sub ? (int)$sub['id'] : 0;
         if ($plan_id <= 0 && $subId) {
@@ -277,12 +284,25 @@ class Platform extends DBConnection
             return $this->conn->real_escape_string($v);
         };
         $uid = (int)platform_user('id');
-        $this->conn->query("INSERT INTO subscription_payments SET business_id={$bid}, subscription_id={$subId}, plan_id={$plan_id}, amount={$amount}, payment_method='{$esc($method)}', reference='{$esc($reference)}', status='paid', notes='{$esc($notes)}', created_by_platform_user_id={$uid}");
-        $end = date('Y-m-d H:i:s', strtotime('+1 month'));
-        if ($subId) {
-            $this->conn->query("UPDATE subscriptions SET status='active', billing_cycle='monthly', current_period_end='{$end}' WHERE id={$subId}");
+        if (!$subId) {
+            return json_encode(array('status' => 'failed', 'msg' => 'No subscription exists for this business.'));
         }
-        $this->conn->query("UPDATE businesses SET status='active' WHERE id={$bid}");
+        $this->conn->begin_transaction();
+        $saved = $this->conn->query("INSERT INTO subscription_payments SET business_id={$bid}, subscription_id={$subId}, plan_id={$plan_id}, amount={$amount}, currency='KES', billing_cycle='monthly', payment_method='{$esc($method)}', reference='{$esc($reference)}', status='paid', notes='{$esc($notes)}', created_by_platform_user_id={$uid}");
+        if (!$saved) {
+            $this->conn->rollback();
+            return json_encode(array('status' => 'failed', 'msg' => 'Payment could not be recorded.'));
+        }
+        $end = date('Y-m-d H:i:s', strtotime('+1 month'));
+        if (!$this->conn->query("UPDATE subscriptions SET status='active', billing_cycle='monthly', amount={$amount}, current_period_end='{$end}' WHERE id={$subId}")) {
+            $this->conn->rollback();
+            return json_encode(array('status' => 'failed', 'msg' => 'Subscription could not be activated.'));
+        }
+        if (!$this->conn->query("UPDATE businesses SET status='active' WHERE id={$bid}")) {
+            $this->conn->rollback();
+            return json_encode(array('status' => 'failed', 'msg' => 'Business status could not be updated.'));
+        }
+        $this->conn->commit();
         platform_audit_log('payment_recorded', "Payment Ksh {$amount} ref {$reference}", $bid);
         return json_encode(array('status' => 'success', 'msg' => 'Payment recorded and subscription activated.'));
     }

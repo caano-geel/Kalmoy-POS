@@ -12,6 +12,8 @@ Class Users extends DBConnection {
 	}
 	public function save_users(){
 		extract($_POST);
+		$business_id = tenant_id();
+		unset($_POST['csrf']);
 		$data = '';
 		foreach($_POST as $k => $v){
 			if(!in_array($k,array('id','password'))){
@@ -73,7 +75,7 @@ Class Users extends DBConnection {
 			}
 
 		}else{
-			$qry = $this->conn->query("UPDATE users set $data where id = {$id}");
+			$qry = $this->conn->query("UPDATE users set $data where id = {$id} AND business_id = {$business_id}");
 			if($qry){
 				$this->settings->set_flashdata('success','User Details successfully updated.');
 				foreach($_POST as $k => $v){
@@ -124,7 +126,7 @@ Class Users extends DBConnection {
 	}
 	public function delete_users(){
 		extract($_POST);
-		$qry = $this->conn->query("DELETE FROM users where id = $id");
+		$qry = $this->conn->query("DELETE FROM users where id = $id AND business_id = ".tenant_id());
 		if($qry){
 			$this->settings->set_flashdata('success','User Details successfully deleted.');
 			return 1;
@@ -222,7 +224,15 @@ Class Users extends DBConnection {
 
 $users = new users();
 $action = !isset($_GET['f']) ? 'none' : strtolower($_GET['f']);
-if($action === 'delete' && admin_is_cashier()){
+if(!tenant_require_auth() || !in_array($action, array('save', 'delete'), true)){
+	echo json_encode(['status'=>'failed','msg'=>'Access denied.']);
+	exit;
+}
+if(!tenant_verify_csrf($_POST['csrf'] ?? '')){
+	echo json_encode(['status'=>'failed','msg'=>'Invalid security token.']);
+	exit;
+}
+if($action === 'delete' && !admin_is_owner()){
 	echo json_encode(['status'=>'failed','msg'=>'Access denied.']);
 	exit;
 }
@@ -237,6 +247,13 @@ if($action === 'save' && admin_is_cashier()){
 		echo json_encode(['status'=>'failed','msg'=>'Access denied.']);
 		exit;
 	}
+}
+if($action === 'save'){
+	$allowed = array('id','firstname','lastname','username','email','phone','password','type','status','avatar','csrf');
+	foreach(array_keys($_POST) as $key){
+		if(!in_array($key, $allowed, true)){ unset($_POST[$key]); }
+	}
+	$_POST['business_id'] = tenant_id();
 }
 switch ($action) {
 	case 'save':

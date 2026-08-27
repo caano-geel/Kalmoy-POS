@@ -39,3 +39,13 @@ if (!defined('DB_SSL_CA')) {
 
 // Optional: force canonical site URL
 // define('base_url', 'https://kalmoypos.infinityfreeapp.com/');
+
+// Provide these as server environment variables or in a protected .env.infinityfree file.
+// These are the only Daraja credential/configuration values you need to replace.
+// MPESA_ENV=production
+// MPESA_CONSUMER_KEY=YOUR_PRODUCTION_CONSUMER_KEY
+// MPESA_CONSUMER_SECRET=YOUR_PRODUCTION_CONSUMER_SECRET
+// MPESA_PASSKEY=YOUR_PRODUCTION_PASSKEY
+// MPESA_SHORTCODE=YOUR_PRODUCTION_SHORTCODE
+// MPESA_TRANSACTION_TYPE=CustomerPayBillOnline
+// MPESA_CALLBACK_URL=https://kalmoypos.com/api/mpesa/callback.php

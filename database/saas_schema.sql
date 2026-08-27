@@ -92,6 +92,7 @@ CREATE TABLE subscriptions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   business_id INT NOT NULL,
   plan_id INT NOT NULL,
+  amount DECIMAL(12,2) NOT NULL DEFAULT 0,
   status ENUM('trial','active','expired','suspended','cancelled') NOT NULL DEFAULT 'trial',
   billing_cycle ENUM('monthly','yearly','trial') NOT NULL DEFAULT 'trial',
   trial_ends_at DATETIME DEFAULT NULL,
@@ -110,19 +111,47 @@ CREATE TABLE subscriptions (
 CREATE TABLE subscription_payments (
   id INT AUTO_INCREMENT PRIMARY KEY,
   business_id INT NOT NULL,
-  subscription_id INT NOT NULL,
+  subscription_id INT DEFAULT NULL,
   plan_id INT NOT NULL,
   amount DECIMAL(12,2) NOT NULL DEFAULT 0,
+  currency CHAR(3) NOT NULL DEFAULT 'KES',
+  billing_cycle ENUM('monthly','yearly') NOT NULL DEFAULT 'monthly',
   payment_method VARCHAR(50) NOT NULL DEFAULT 'manual',
   reference VARCHAR(120) DEFAULT NULL,
+  phone_number VARCHAR(20) DEFAULT NULL,
+  merchant_request_id VARCHAR(120) DEFAULT NULL,
+  checkout_request_id VARCHAR(120) DEFAULT NULL,
+  mpesa_receipt VARCHAR(120) DEFAULT NULL,
+  provider_result_code VARCHAR(30) DEFAULT NULL,
+  provider_result_description VARCHAR(255) DEFAULT NULL,
+  transaction_date DATETIME DEFAULT NULL,
+  idempotency_key VARCHAR(80) DEFAULT NULL,
+  subscription_action_applied_at DATETIME DEFAULT NULL,
   payment_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  status ENUM('pending','paid','failed','refunded') NOT NULL DEFAULT 'paid',
+  status ENUM('pending','paid','failed','cancelled','timeout','refunded') NOT NULL DEFAULT 'pending',
   notes TEXT DEFAULT NULL,
   created_by_platform_user_id INT DEFAULT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_subpay_checkout_request (checkout_request_id),
+  UNIQUE KEY uk_subpay_mpesa_receipt (mpesa_receipt),
+  UNIQUE KEY uk_subpay_idempotency (idempotency_key),
   KEY idx_subpay_business (business_id),
+  KEY idx_subpay_status (status),
   CONSTRAINT fk_subpay_business FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,
   CONSTRAINT fk_subpay_sub FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE payment_events (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  payment_id INT NOT NULL,
+  event_type VARCHAR(40) NOT NULL,
+  provider_event_key VARCHAR(160) DEFAULT NULL,
+  payload_json LONGTEXT DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_payment_event_provider (provider_event_key),
+  KEY idx_payment_events_payment (payment_id),
+  CONSTRAINT fk_payment_events_payment FOREIGN KEY (payment_id) REFERENCES subscription_payments(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE business_settings (

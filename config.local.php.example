@@ -33,3 +33,12 @@ if (!defined('DB_SSL_CA')) {
 
 // Optional fixed local URL:
 // define('base_url', 'http://localhost/BestPosKalmoy/');
+
+// Optional local Daraja sandbox configuration. Prefer environment variables.
+// MPESA_ENV=sandbox
+// MPESA_CONSUMER_KEY=YOUR_SANDBOX_CONSUMER_KEY
+// MPESA_CONSUMER_SECRET=YOUR_SANDBOX_CONSUMER_SECRET
+// MPESA_PASSKEY=YOUR_SANDBOX_PASSKEY
+// MPESA_SHORTCODE=YOUR_SANDBOX_SHORTCODE
+// MPESA_TRANSACTION_TYPE=CustomerPayBillOnline
+// MPESA_CALLBACK_URL=https://your-public-https-host.example/api/mpesa/callback.php

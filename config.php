@@ -12,6 +12,9 @@ session_start();
 require_once('classes/DBConnection.php');
 require_once('classes/SystemSettings.php');
 require_once('classes/CustomerDebtService.php');
+require_once('classes/MpesaService.php');
+require_once('classes/SubscriptionService.php');
+require_once('classes/PaymentService.php');
 if(file_exists(__DIR__ . '/vendor/autoload.php')){
     require_once(__DIR__ . '/vendor/autoload.php');
 }
@@ -1020,6 +1023,7 @@ function admin_cashier_page_permission($page){
         'users' => 'users_manage',
         'users/manage_user' => 'users_manage',
         'subscription_expired' => 'my_account',
+        'subscription' => 'my_account',
         'notifications' => 'dashboard_limited',
         'maintenance/brand' => 'brands',
         'maintenance/manage_brand' => 'brands',

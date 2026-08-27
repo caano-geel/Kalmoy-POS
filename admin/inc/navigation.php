@@ -135,6 +135,15 @@
           <?php endif; ?>
           <?php endif; ?>
 
+          <?php if (admin_is_owner()): ?>
+          <li class="nav-item">
+            <a href="<?php echo base_url ?>admin/?page=subscription" class="nav-link nav-subscription" data-title="Subscription &amp; Billing">
+              <i class="nav-icon fas fa-credit-card"></i>
+              <span class="nav-link-label">Subscription &amp; Billing</span>
+            </a>
+          </li>
+          <?php endif; ?>
+
           <?php if ($show_customers): ?>
           <li class="sidenav-section-title"><span>Customers</span></li>
           <?php if (admin_cashier_can('clients')): ?>

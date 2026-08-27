@@ -62,7 +62,7 @@ if(isset($_SESSION['userdata']) && tenant_id() <= 0 && strpos($link, 'login.php'
     redirect('admin/login.php');
     exit;
 }
-$allow_subscription_page = (isset($_GET['page']) && $_GET['page'] === 'subscription_expired');
+$allow_subscription_page = isset($_GET['page']) && in_array($_GET['page'], array('subscription_expired', 'subscription'), true);
 if(isset($_SESSION['userdata']) && strpos($link, 'login.php') === false){
     $sub = tenant_subscription_status();
     if(!$sub['allowed'] && !$allow_subscription_page){
